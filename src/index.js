@@ -19,6 +19,34 @@ window.onload = () => {
         const sphere = MeshBuilder.CreateSphere("sphere",  
             {diameter: 2, segments: 32}, scene); 
         sphere.position.y = 1; 
+
+        // Animation pour déplacer la sphère sur l'axe x
+        let xPosition = -3;
+        let goLeft = false;
+        let goRight = true;
+        scene.onBeforeRenderObservable.add(() => {
+            sphere.position.x = xPosition;
+        
+            if (goRight) {
+                xPosition += 0.05;
+            }
+        
+            if (goLeft) {
+                xPosition -= 0.05;
+            }
+        
+            if (xPosition >= 3) {
+                goLeft = true;
+                goRight = false;
+            }
+        
+            if (xPosition <= -3) {
+                goLeft = false;
+                goRight = true;
+            }
+        });
+        
+
         const ground = MeshBuilder.CreateGround("ground",  
             {width: 6, height: 6}, scene); 
         return scene; 
@@ -30,4 +58,4 @@ window.onload = () => {
     window.addEventListener("resize", function () { 
             engine.resize(); 
     }); 
-}; 
+};
