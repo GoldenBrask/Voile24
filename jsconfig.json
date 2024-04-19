@@ -17,4 +17,4 @@
     "forceConsistentCasingInFileNames" : true, 
     }, 
     "exclude": ["node_modules/**/*", "dist/**/*", "webpack*.*"] 
-} 
+  } 
