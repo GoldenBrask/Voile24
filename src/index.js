@@ -1,61 +1,26 @@
-import { Engine, FreeCamera, HemisphericLight, MeshBuilder, Scene, Vector3 } 
-from "@babylonjs/core"; 
- 
-window.onload = () => { 
-    console.log('Hello World!'); 
- 
-    const canvas = document.getElementById("renderCanvas"); 
-    let engine = new Engine(canvas, true); 
- 
-    const createScene = function () { 
-        const scene = new Scene(engine); 
-        const camera = new FreeCamera("camera1",  
-            new Vector3(0, 5, -10), scene); 
-        camera.setTarget(Vector3.Zero()); 
-        camera.attachControl(canvas, true); 
-        const light = new HemisphericLight("light",  
-            new Vector3(0, 1, 0), scene); 
-        light.intensity = 0.7; 
-        const sphere = MeshBuilder.CreateSphere("sphere",  
-            {diameter: 2, segments: 32}, scene); 
-        sphere.position.y = 1; 
+import { Engine } from "@babylonjs/core";
+import Game from "./game";
 
-        // Animation pour déplacer la sphère sur l'axe x
-        let xPosition = -3;
-        let goLeft = false;
-        let goRight = true;
-        scene.onBeforeRenderObservable.add(() => {
-            sphere.position.x = xPosition;
-        
-            if (goRight) {
-                xPosition += 0.05;
-            }
-        
-            if (goLeft) {
-                xPosition -= 0.05;
-            }
-        
-            if (xPosition >= 3) {
-                goLeft = true;
-                goRight = false;
-            }
-        
-            if (xPosition <= -3) {
-                goLeft = false;
-                goRight = true;
-            }
-        });
-        
 
-        const ground = MeshBuilder.CreateGround("ground",  
-            {width: 6, height: 6}, scene); 
-        return scene; 
-    }; 
-    const scene = createScene();  
-    engine.runRenderLoop(function () { 
-            scene.render(); 
-    }); 
-    window.addEventListener("resize", function () { 
-            engine.resize(); 
-    }); 
+let canvas;
+let engine;
+
+const babylonInit = async () => {
+  canvas = document.getElementById("renderCanvas");
+
+  engine = new Engine(canvas, false, {
+    adaptToDeviceRatio: true,
+  });
+
+  window.addEventListener("resize", function () {
+    engine.resize();
+  });
+
+};
+
+window.onload = () => {
+  babylonInit().then(() => {
+    const game = new Game(canvas, engine);
+    game.start();
+  });
 };

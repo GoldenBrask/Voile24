@@ -48,6 +48,21 @@ module.exports = {
                 ],
             },
             {
+                test: /\.(jpg|jpeg|png)$/,
+                include: path.resolve(__dirname, 'src/assets/textures/TropicalSunnyDay'),
+                use: [
+                  {
+                    loader: 'file-loader',
+                    options: {
+                      name: '[name].[ext]',
+                      outputPath: 'assets/textures/TropicalSunnyDay',
+                      publicPath: 'assets/textures/TropicalSunnyDay',
+                      esModule: false, // important pour que require() retourne une chaîne de caractères
+                    },
+                  },
+                ],
+              },
+            {
                 test: /\.(png|jpg|gif|env|gltf|stl|dds|json)$/i,
                 use: [
                     {
