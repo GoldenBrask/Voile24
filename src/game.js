@@ -19,7 +19,7 @@ import { Inspector } from "@babylonjs/inspector";
 import { WaterMaterial } from "@babylonjs/materials";
 //Texture :
 import floorUrl from "../assets/textures/ground.jpg";
-import skyhUrl from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay";
+import skyhUrl from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay.jpg";
 import waterUrl from "../assets/textures/waterbump.png";
 class Game {
   #canvas;
@@ -42,6 +42,7 @@ class Game {
 
   initGame() {
     this.#gameScene = this.createScene();
+    Inspector.Show(this.#gameScene,Game)
   }
 
   endGame() {}
@@ -98,7 +99,7 @@ class Game {
 	let skybox = Mesh.CreateBox("skyBox", 1000.0, scene);
     let skyboxMaterial = new StandardMaterial("skyBox", scene);
 	skyboxMaterial.backFaceCulling = false;
-	skyboxMaterial.reflectionTexture = new CubeTexture(skyhUrl, scene);
+	skyboxMaterial.reflectionTexture = new Texture(skyhUrl, scene);
 	skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
 	skyboxMaterial.diffuseColor = new Color3(0, 0, 0);
 	skyboxMaterial.specularColor = new Color3(0, 0, 0);
