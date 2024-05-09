@@ -1,5 +1,5 @@
 import {
-  FreeCamera,
+  FollowCamera,
   HemisphericLight,
   MeshBuilder,
   Scene,
@@ -8,7 +8,7 @@ import {
   Vector2,
 } from "@babylonjs/core";
 import {
-  ArcRotateCamera,
+  FreeCamera,
   Color3,
   CubeTexture,
   Mesh,
@@ -21,17 +21,27 @@ import { WaterMaterial } from "@babylonjs/materials";
 import floorUrl from "../assets/textures/ground.jpg";
 import skyhUrl from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay.jpg";
 import waterUrl from "../assets/textures/waterbump.png";
+
+import Player from './player';
+
+import { GlobalManager } from './globalmanager';
+
 class Game {
-  #canvas;
-  #engine;
-  #gameScene;
-  #sphere;
-  #mapsize = 2048;
-  #phase = 0.0;
+  canvas;
+  engine;
+  gameScene;
+  sphere;
+  mapsize = 2048;
+  phase = 0.0;
+  camera;
+
+  player;
+  inputMap = {};
+  actions = {};
 
   constructor(canvas, engine) {
-    this.#canvas = canvas;
-    this.#engine = engine;
+    GlobalManager.engine = engine;
+    GlobalManager.canvas = canvas;
   }
 
   async start() {
@@ -41,20 +51,25 @@ class Game {
   }
 
   async initGame() {
-    this.#engine.displayLoadingUI();
-    this.#gameScene = this.createScene();
-    Inspector.Show(this.#gameScene, Game)
-    this.#engine.hideLoadingUI();
+    GlobalManager.engine.displayLoadingUI();
+    this.gameScene = this.createScene();
+    this.player = new Player(new Vector3(0, 0.5, 0));
+    await this.player.init();
+   
+    this.camera.lockedTarget = this.player.mesh;
+
+    Inspector.Show(this.gameScene, Game)
+    GlobalManager.engine.hideLoadingUI();
   }
 
   endGame() { }
 
   gameLoop() {
     const divFps = document.getElementById("fps");
-    this.#engine.runRenderLoop(() => {
+    GlobalManager.engine.runRenderLoop(() => {
       this.updateGame();
-      divFps.innerHTML = this.#engine.getFps().toFixed() + " fps";
-      this.#gameScene.render();
+      divFps.innerHTML = GlobalManager.engine.getFps().toFixed() + " fps";
+      this.gameScene.render();
     });
   }
 
@@ -67,10 +82,18 @@ class Game {
 
 
   createScene = function () {
-    const scene = new Scene(this.#engine);
+    const scene = new Scene(GlobalManager.engine);
 
-    let camera = new ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 4, 100, Vector3.Zero(), scene);
-    camera.attachControl(this.#canvas, true);
+    this.camera = new FollowCamera("followCam", new Vector3(0, 5, -10), this.scene);
+
+    // Configurer la caméra
+    this.camera.radius = 10; // Distance de la cible
+    this.camera.heightOffset = 2; // Hauteur par rapport à la cible
+    this.camera.rotationOffset = -85; // Rotation de 90 degrés autour de la cible
+
+    // Attacher la caméra au canvas sans permettre le contrôle utilisateur
+    this.camera.attachControl(this.canvas, true);
+    this.camera.inputs.clear(); 
 
     let light = new HemisphericLight("light1", new Vector3(0, 1, 0), scene);
 
@@ -90,19 +113,19 @@ class Game {
     groundMaterial.diffuseTexture = new Texture(floorUrl, scene);
     groundMaterial.diffuseTexture.uScale = groundMaterial.diffuseTexture.vScale = 4;
 
-    let ground = Mesh.CreateGround("ground", this.#mapsize, this.#mapsize, 32, scene, false);
+    let ground = Mesh.CreateGround("ground", this.mapsize, this.mapsize, 32, scene, false);
     ground.position.y = -1;
     ground.material = groundMaterial;
 
     // Water
-    let waterMesh = Mesh.CreateGround("waterMesh", this.#mapsize, this.#mapsize, 32, scene, false);
+    let waterMesh = Mesh.CreateGround("waterMesh", this.mapsize, this.mapsize, 32, scene, false);
 
     let water = new WaterMaterial("water", scene);
     water.bumpTexture = new Texture(waterUrl, scene);
 
     // Water properties
     water.windForce = -35;
-    water.waveHeight = 0.7;
+    water.waveHeight = 0.05;
     water.windDirection = new Vector2(1, 1);
     water.waterColor = new Color3(0.1, 0.1, 0.6);
     water.colorBlendFactor = 0.3;
