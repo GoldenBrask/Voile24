@@ -64,36 +64,56 @@ class Player {
         //Mesh "Object_11" => Roues
     }
 
-    update(inputMap, actions) {
+    update(delta, inputMap, actions) {
 
-        this.getInputs(inputMap, actions);
+        this.getInputs(delta, inputMap, actions);
 
         this.applyCameraToInputs();
         this.move();
     }
 
-    getInputs(inputMap, actions) {
-
-        this.moveInput.set(0, 0, 0);
+    getInputs(delta, inputMap, actions) {
+        
 
         if (inputMap["KeyA"]) {
-            this.moveInput.x = -1;
+            this.mesh.position.x -= SPEED * delta;
         }
         else if (inputMap["KeyD"]) {
-            this.moveInput.x = 1;
+            this.mesh.position.x += SPEED * delta;
         }
 
         
         if (inputMap["KeyW"]) {
-            this.moveInput.z = 1;
+            this.mesh.position.z += SPEED * delta;
         }
         else if (inputMap["KeyS"]) {
-            this.moveInput.z = -1;
+            this.mesh.position.z -= SPEED * delta;
         }
 
         if (actions["Space"]) {
             //TODO jump
         }
+
+        // this.moveInput.set(0, 0, 0);
+
+        // if (inputMap["KeyA"]) {
+        //     this.moveInput.x = -1;
+        // }
+        // else if (inputMap["KeyD"]) {
+        //     this.moveInput.x = 1;
+        // }
+
+        
+        // if (inputMap["KeyW"]) {
+        //     this.moveInput.z = 1;
+        // }
+        // else if (inputMap["KeyS"]) {
+        //     this.moveInput.z = -1;
+        // }
+
+        // if (actions["Space"]) {
+        //     //TODO jump
+        // }
 
     }
 

@@ -100,7 +100,7 @@ class Game {
   }
 
   updateGame() {
-    this.player.update(this.inputMap, this.actions);
+    this.player.update(GlobalManager.deltaTime, this.inputMap, this.actions);
     // let deltaTime = this.#engine.getDeltaTime();
     // this.#phase += 0.0019 * deltaTime;
     // this.#sphere.position.y = Math.sin(this.#phase); // TODO : SERT POUR LE BOUNCE DU BATEAU
