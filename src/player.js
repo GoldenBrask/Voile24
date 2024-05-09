@@ -76,18 +76,18 @@ class Player {
         
 
         if (inputMap["KeyA"]) {
-            this.mesh.position.x -= SPEED * delta;
+            this.mesh.position.z -= SPEED * delta;
         }
         else if (inputMap["KeyD"]) {
-            this.mesh.position.x += SPEED * delta;
+            this.mesh.position.z += SPEED * delta;
         }
 
         
         if (inputMap["KeyW"]) {
-            this.mesh.position.z += SPEED * delta;
+            this.mesh.position.x -= SPEED * delta;
         }
         else if (inputMap["KeyS"]) {
-            this.mesh.position.z -= SPEED * delta;
+            this.mesh.position.x += SPEED * delta;
         }
 
         if (actions["Space"]) {
