@@ -70,13 +70,21 @@ class Game {
     GlobalManager.engine.displayLoadingUI();
     await this.createScene();
     this.initKeyboard();
-    this.player = new Player(new Vector3(0, 0.5, 0));
+    this.player = new Player(new Vector3(0, 3, 0));
     await this.player.init();
    
     GlobalManager.camera.lockedTarget = this.player.mesh;
 
     Inspector.Show(GlobalManager.scene, Game)
     GlobalManager.engine.hideLoadingUI();
+
+    //TODO : le bloc suivant à supprimer
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "i" || event.key === "I") {
+          Inspector.Show(this.gameScene, Game);
+      }
+  });
+
   }
 
   endGame() { }
@@ -104,12 +112,12 @@ class Game {
     GlobalManager.scene = new Scene(GlobalManager.engine);
     GlobalManager.scene.collisionsEnabled = true;
 
-    GlobalManager.camera = new FollowCamera("followCam", new Vector3(0, 5, -10), GlobalManager.scene);
+    GlobalManager.camera = new FollowCamera("followCam", new Vector3(0, 0, 0), GlobalManager.scene);
 
     // Configurer la caméra
-    GlobalManager.camera.radius = 10; // Distance de la cible
+    GlobalManager.camera.radius = 11; // Distance de la cible
     GlobalManager.camera.heightOffset = 2; // Hauteur par rapport à la cible
-    GlobalManager.camera.rotationOffset = -85; // Rotation de 90 degrés autour de la cible
+    GlobalManager.camera.rotationOffset = -90; // Rotation de 90 degrés autour de la cible
 
     // Attacher la caméra au canvas sans permettre le contrôle utilisateur
     GlobalManager.camera.attachControl(this.canvas, true);
