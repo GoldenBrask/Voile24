@@ -1,19 +1,22 @@
-import { AxesViewer, Color3, MeshBuilder, Quaternion, Scalar, Scene, SceneLoader, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { Quaternion, SceneLoader, TransformNode, Vector3, Color3 } from '@babylonjs/core';
 import { GlobalManager } from './globalmanager';
+import { PhysicsImpostor } from '@babylonjs/core/Physics/physicsImpostor';
 
 import playerMeshUrl from "../assets/models/yacht.glb";
+import { Mesh, MeshBuilder } from 'babylonjs';
 
-const SPEED = 15.0;
-const TURN_SPEED = 4*Math.PI;
-
+const SPEED = 30.0;
+const TURN_SPEED = 2*Math.PI;
+const BOUNCE_HEIGHT = 0.2;
+const DEBUG_COLLISION = false;
 class Player {
 
-    transform;
     mesh;
 
-    axes;
-
     spawnPoint;
+
+    positiony;
+    phase = 0.0;
 
     //Vecteur d'input
     moveInput = new Vector3(0, 0, 0);
@@ -28,92 +31,90 @@ class Player {
     }
 
     async init() {
-        /*this.mesh = MeshBuilder.CreateBox('playerMesh', {size: 2});
-        this.mesh.material = new StandardMaterial("playerMat", GlobalManager.scene);
-        this.mesh.material.diffuseColor = new Color3(1, 0, 0);
-        this.mesh.visibility = 0.6;*/
-
-        this.transform = new TransformNode("player", GlobalManager.scene);
-        this.transform.position = this.spawnPoint.clone();
-
         const result = await SceneLoader.ImportMeshAsync("", "", playerMeshUrl, GlobalManager.scene);
-        //Attention mesh sans vertices !!
+
         this.mesh = result.meshes[0];
-        this.mesh.name = "playerVehicule";
+        this.mesh.name = "boat";
         this.mesh.rotationQuaternion = Quaternion.Identity();
-        this.mesh.parent = this.transform;
-        this.mesh.position = Vector3.Zero();
+        this.mesh.position = this.spawnPoint;
+        this.positiony = this.spawnPoint.y;
+    
+        // this.mesh.physicsImpostor = new PhysicsImpostor(this.mesh, PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.9 }, GlobalManager.scene);
+
         
         for (let childMesh of result.meshes) {
-            if ((childMesh.name === "Object_3") ||
-            (childMesh.name === "Object_5") ||
-            (childMesh.name === "Object_4") ||
-            (childMesh.name === "Object_11")) {
-
+            if (childMesh.getTotalVertices() > 0){
                 childMesh.receiveShadows = true;
                 GlobalManager.addShadowCaster(childMesh);
             }
         }
 
-        const poignee = this.mesh.getChildTransformNodes().find( (node) => node.name === 'Object_2');
-        let childObj = MeshBuilder.CreateBox("childObj", GlobalManager.scene);
-        childObj.setParent(poignee);
-        childObj.position.set(0, 0, 0);
-        childObj.scaling.set(1, 1, 1)
+        this.mesh.ellipsoid = new Vector3(2, 2, 2);
+        const ellipsoidOffset = 0.0;
+        this.mesh.ellipsoidOffset = new Vector3(0, ellipsoidOffset, 0); 
 
-        //Mesh "Object_11" => Roues
+        if (DEBUG_COLLISION) {
+            const a = this.mesh.ellipsoid.x;
+            const b = this.mesh.ellipsoid.y;
+            const points = [];
+            for (let theta = -Math.PI/2; theta < Math.PI/2; theta += Math.PI/36) {
+                const x = a * Math.cos(theta);
+                const y = b * Math.sin(theta);
+                points.push(new Vector3(0, y, x));
+            }
+            
+            const ellipse = [];
+            ellipse[0] = MeshBuilder.CreateLines("ellipse", {points: points}, GlobalManager.scene);
+            ellipse[0].color = new Color3(1, 0, 0);
+            ellipse[0].parent = this.mesh;
+            const steps = 12;
+            const dTheta = 2*Math.PI/steps;
+            for (let i = 1; i <= steps; i++) {
+                const points = [];
+                ellipse[i] = ellipse[0].clone("ellipse"+i);
+                ellipse[i].parent = this.mesh;
+                ellipse[i].rotation.y = i*dTheta;
+            }
+        }
+
+        
+
     }
 
-    update(delta, inputMap, actions) {
+    update(inputMap, actions) {
 
-        this.getInputs(delta, inputMap, actions);
+        this.getInputs(inputMap, actions);
 
         this.applyCameraToInputs();
         this.move();
+
+        this.phase += 1.9 * GlobalManager.deltaTime;
+        this.mesh.position.y = this.positiony + (Math.sin(this.phase) * BOUNCE_HEIGHT);   // Appliquer l'oscillation autour de la position de base
     }
 
-    getInputs(delta, inputMap, actions) {
-        
+    getInputs(inputMap, actions) {
+
+        this.moveInput.set(0, 0, 0);
 
         if (inputMap["KeyA"]) {
-            this.mesh.position.z -= SPEED * delta;
+            this.moveInput.x = -1;
+            this.moveInput.z = 1;
         }
         else if (inputMap["KeyD"]) {
-            this.mesh.position.z += SPEED * delta;
+            this.moveInput.x = 1;
+            this.moveInput.z = 1;
         }
 
         
         if (inputMap["KeyW"]) {
-            this.mesh.position.x -= SPEED * delta;
-        }
-        else if (inputMap["KeyS"]) {
-            this.mesh.position.x += SPEED * delta;
+            this.moveInput.z = 1;
+            this.moveInput.y = 1;
         }
 
         if (actions["Space"]) {
-            //TODO jump
+            //TODO: Jump
         }
-
-        // this.moveInput.set(0, 0, 0);
-
-        // if (inputMap["KeyA"]) {
-        //     this.moveInput.x = -1;
-        // }
-        // else if (inputMap["KeyD"]) {
-        //     this.moveInput.x = 1;
-        // }
-
         
-        // if (inputMap["KeyW"]) {
-        //     this.moveInput.z = 1;
-        // }
-        // else if (inputMap["KeyS"]) {
-        //     this.moveInput.z = -1;
-        // }
-
-        // if (actions["Space"]) {
-        //     //TODO jump
-        // }
 
     }
 
@@ -154,7 +155,15 @@ class Player {
                  TURN_SPEED * GlobalManager.deltaTime, this.mesh.rotationQuaternion);
 
             this.moveDirection.scaleInPlace(SPEED * GlobalManager.deltaTime);            
-            this.transform.position.addInPlace(this.moveDirection);
+            // this.mesh.position.addInPlace(this.moveDirection);
+        }
+
+        this.moveDirection.addInPlace(GlobalManager.gravityVector.scale(GlobalManager.deltaTime));
+        this.mesh.moveWithCollisions(this.moveDirection);
+
+        let collidedMesh = this.mesh.collider ? this.mesh.collider.collidedMesh : null;
+        if (collidedMesh) {
+           console.log("Collision avec : " + collidedMesh.name);
         }
     }
 
