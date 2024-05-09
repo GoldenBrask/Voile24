@@ -8,7 +8,7 @@ import {
   Vector2,
 } from "@babylonjs/core";
 import {
-  FreeCamera,
+  KeyboardEventTypes,
   Color3,
   CubeTexture,
   Mesh,
@@ -44,6 +44,22 @@ class Game {
     GlobalManager.canvas = canvas;
   }
 
+  initKeyboard() {
+    GlobalManager.scene.onKeyboardObservable.add((kbInfo) => {
+        switch (kbInfo.type) {
+            case KeyboardEventTypes.KEYDOWN:
+                this.inputMap[kbInfo.event.code] = true;
+                //console.log(`KEY DOWN: ${kbInfo.event.code} / ${kbInfo.event.key}`);
+                break;
+            case KeyboardEventTypes.KEYUP:
+                this.inputMap[kbInfo.event.code] = false;
+                this.actions[kbInfo.event.code] = true;
+                //console.log(`KEY UP: ${kbInfo.event.code} / ${kbInfo.event.key}`);
+                break;
+        }
+    });        
+}
+
   async start() {
     await this.initGame();
     this.gameLoop();
@@ -52,13 +68,14 @@ class Game {
 
   async initGame() {
     GlobalManager.engine.displayLoadingUI();
-    this.gameScene = this.createScene();
+    await this.createScene();
+    this.initKeyboard();
     this.player = new Player(new Vector3(0, 0.5, 0));
     await this.player.init();
    
-    this.camera.lockedTarget = this.player.mesh;
+    GlobalManager.camera.lockedTarget = this.player.mesh;
 
-    Inspector.Show(this.gameScene, Game)
+    Inspector.Show(GlobalManager.scene, Game)
     GlobalManager.engine.hideLoadingUI();
   }
 
@@ -67,13 +84,15 @@ class Game {
   gameLoop() {
     const divFps = document.getElementById("fps");
     GlobalManager.engine.runRenderLoop(() => {
+      GlobalManager.update();
       this.updateGame();
       divFps.innerHTML = GlobalManager.engine.getFps().toFixed() + " fps";
-      this.gameScene.render();
+      GlobalManager.scene.render();
     });
   }
 
   updateGame() {
+    this.player.update(this.inputMap, this.actions);
     // let deltaTime = this.#engine.getDeltaTime();
     // this.#phase += 0.0019 * deltaTime;
     // this.#sphere.position.y = Math.sin(this.#phase); // TODO : SERT POUR LE BOUNCE DU BATEAU
@@ -81,27 +100,28 @@ class Game {
 
 
 
-  createScene = function () {
-    const scene = new Scene(GlobalManager.engine);
+  async createScene () {
+    GlobalManager.scene = new Scene(GlobalManager.engine);
+    GlobalManager.scene.collisionsEnabled = true;
 
-    this.camera = new FollowCamera("followCam", new Vector3(0, 5, -10), this.scene);
+    GlobalManager.camera = new FollowCamera("followCam", new Vector3(0, 5, -10), GlobalManager.scene);
 
     // Configurer la caméra
-    this.camera.radius = 10; // Distance de la cible
-    this.camera.heightOffset = 2; // Hauteur par rapport à la cible
-    this.camera.rotationOffset = -85; // Rotation de 90 degrés autour de la cible
+    GlobalManager.camera.radius = 10; // Distance de la cible
+    GlobalManager.camera.heightOffset = 2; // Hauteur par rapport à la cible
+    GlobalManager.camera.rotationOffset = -85; // Rotation de 90 degrés autour de la cible
 
     // Attacher la caméra au canvas sans permettre le contrôle utilisateur
-    this.camera.attachControl(this.canvas, true);
-    this.camera.inputs.clear(); 
+    GlobalManager.camera.attachControl(this.canvas, true);
+    GlobalManager.camera.inputs.clear(); 
 
-    let light = new HemisphericLight("light1", new Vector3(0, 1, 0), scene);
+    let light = new HemisphericLight("light1", new Vector3(0, 1, 0), GlobalManager.scene);
 
     // Skybox
-    let skybox = Mesh.CreateBox("skyBox", 1000.0, scene);
-    let skyboxMaterial = new StandardMaterial("skyBox", scene);
+    let skybox = Mesh.CreateBox("skyBox", 1000.0, GlobalManager.scene);
+    let skyboxMaterial = new StandardMaterial("skyBox", GlobalManager.scene);
     skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.reflectionTexture = new Texture(skyhUrl, scene);
+    skyboxMaterial.reflectionTexture = new Texture(skyhUrl, GlobalManager.scene);
     skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
     skyboxMaterial.diffuseColor = new Color3(0, 0, 0);
     skyboxMaterial.specularColor = new Color3(0, 0, 0);
@@ -109,19 +129,19 @@ class Game {
     skybox.material = skyboxMaterial;
 
     // Ground
-    let groundMaterial = new StandardMaterial("groundMaterial", scene);
-    groundMaterial.diffuseTexture = new Texture(floorUrl, scene);
+    let groundMaterial = new StandardMaterial("groundMaterial", GlobalManager.scene);
+    groundMaterial.diffuseTexture = new Texture(floorUrl, GlobalManager.scene);
     groundMaterial.diffuseTexture.uScale = groundMaterial.diffuseTexture.vScale = 4;
 
-    let ground = Mesh.CreateGround("ground", this.mapsize, this.mapsize, 32, scene, false);
+    let ground = Mesh.CreateGround("ground", this.mapsize, this.mapsize, 32, GlobalManager.scene, false);
     ground.position.y = -1;
     ground.material = groundMaterial;
 
     // Water
-    let waterMesh = Mesh.CreateGround("waterMesh", this.mapsize, this.mapsize, 32, scene, false);
+    let waterMesh = Mesh.CreateGround("waterMesh", this.mapsize, this.mapsize, 32, GlobalManager.scene, false);
 
-    let water = new WaterMaterial("water", scene);
-    water.bumpTexture = new Texture(waterUrl, scene);
+    let water = new WaterMaterial("water", GlobalManager.scene);
+    water.bumpTexture = new Texture(waterUrl, GlobalManager.scene);
 
     // Water properties
     water.windForce = -35;
@@ -139,7 +159,6 @@ class Game {
     // Assign the water material
     waterMesh.material = water;
 
-    return scene;
   }
 
 
