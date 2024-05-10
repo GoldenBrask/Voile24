@@ -7,8 +7,6 @@ import {
   Vector3,
   SceneLoader,
   Vector2,
-} from "@babylonjs/core";
-import {
   KeyboardEventTypes,
   Color3,
   CubeTexture,
@@ -16,6 +14,7 @@ import {
   StandardMaterial,
   Texture,
 } from "@babylonjs/core";
+
 import { Inspector } from "@babylonjs/inspector";
 import { WaterMaterial } from "@babylonjs/materials";
 //Texture :
@@ -27,10 +26,8 @@ import TropicalSunnyDay_ny from "../assets/textures/TropicalSunnyDay/TropicalSun
 import TropicalSunnyDay_pz from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_pz.jpg";
 import TropicalSunnyDay_nz from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_nz.jpg";
 import waterUrl from "../assets/textures/waterbump.png";
-
-import Player from './player';
-
-import { GlobalManager } from './globalmanager';
+import Player from "./player";
+import { GlobalManager } from "./globalmanager";
 
 class Game {
   canvas;
@@ -52,19 +49,17 @@ class Game {
 
   initKeyboard() {
     GlobalManager.scene.onKeyboardObservable.add((kbInfo) => {
-        switch (kbInfo.type) {
-            case KeyboardEventTypes.KEYDOWN:
-                this.inputMap[kbInfo.event.code] = true;
-                //console.log(`KEY DOWN: ${kbInfo.event.code} / ${kbInfo.event.key}`);
-                break;
-            case KeyboardEventTypes.KEYUP:
-                this.inputMap[kbInfo.event.code] = false;
-                this.actions[kbInfo.event.code] = true;
-                //console.log(`KEY UP: ${kbInfo.event.code} / ${kbInfo.event.key}`);
-                break;
-        }
-    });        
-}
+      switch (kbInfo.type) {
+        case KeyboardEventTypes.KEYDOWN:
+          this.inputMap[kbInfo.event.code] = true;
+          break;
+        case KeyboardEventTypes.KEYUP:
+          this.inputMap[kbInfo.event.code] = false;
+          this.actions[kbInfo.event.code] = true;
+          break;
+      }
+    });
+  }
 
   async start() {
     await this.initGame();
@@ -78,20 +73,34 @@ class Game {
     this.initKeyboard();
     this.player = new Player(new Vector3(0, 3, 0));
     await this.player.init();
-   
+
     GlobalManager.camera.lockedTarget = this.player.mesh;
+
+    let player2 = new Player(new Vector3(5, 3, 0));
+    await player2.init();
+
+    let player3 = new Player(new Vector3(10, 3, 0));
+    await player3.init();
+
+    const box = MeshBuilder.CreateBox("box", {
+      height: 75,
+      width: 75,
+      depth: 5,
+    });
+    box.checkCollisions = true;
+    box.position = new Vector3(0, 3, 0);
+
     GlobalManager.engine.hideLoadingUI();
 
     //TODO : le bloc suivant à supprimer
     window.addEventListener("keydown", (event) => {
       if (event.key === "i" || event.key === "I") {
-          Inspector.Show(this.gameScene, Game);
+        Inspector.Show(this.gameScene, Game);
       }
-  });
-
+    });
   }
 
-  endGame() { }
+  endGame() {}
 
   gameLoop() {
     const divFps = document.getElementById("fps");
@@ -104,58 +113,84 @@ class Game {
   }
 
   updateGame() {
-    this.player.update(GlobalManager.deltaTime, this.inputMap, this.actions);
-    // let deltaTime = this.#engine.getDeltaTime();
-    // this.#phase += 0.0019 * deltaTime;
-    // this.#sphere.position.y = Math.sin(this.#phase); // TODO : SERT POUR LE BOUNCE DU BATEAU
+    this.player.update(this.inputMap, this.actions);
   }
 
-
-
-  async createScene () {
+  async createScene() {
     GlobalManager.scene = new Scene(GlobalManager.engine);
-    GlobalManager.scene.collisionsEnabled = true;
 
-    GlobalManager.camera = new FollowCamera("followCam", new Vector3(0, 0, 0), GlobalManager.scene);
+    GlobalManager.scene.collisionsEnabled = true;
+    const assumedFramesPerSecond = 60;
+    GlobalManager.scene.gravity = new Vector3(
+      0,
+      GlobalManager.gravityVector / assumedFramesPerSecond,
+      0
+    );
+
+    GlobalManager.camera = new FollowCamera(
+      "followCam1",
+      new Vector3(0, 5, -10),
+      GlobalManager.scene
+    );
 
     // Configurer la caméra
     GlobalManager.camera.radius = 11; // Distance de la cible
     GlobalManager.camera.heightOffset = 2; // Hauteur par rapport à la cible
-    GlobalManager.camera.rotationOffset = -90; // Rotation de 90 degrés autour de la cible
-
-    // Attacher la caméra au canvas sans permettre le contrôle utilisateur
+    GlobalManager.camera.rotationOffset = 180; // Rotation de 90 degrés autour de la cible
     GlobalManager.camera.attachControl(this.canvas, true);
-    // GlobalManager.camera.inputs.clear(); 
+    GlobalManager.camera.inputs.clear(); // Supprimer les inputs par défaut
 
-    let light = new HemisphericLight("light1", new Vector3(0, 1, 0), GlobalManager.scene);
+    let light = new HemisphericLight(
+      "light1",
+      new Vector3(0, 1, 0),
+      GlobalManager.scene
+    );
 
     // Skybox
-    // let skyboxTexture = CubeTexture.CreateFromImages(
-    //   [TropicalSunnyDay_px, TropicalSunnyDay_py, TropicalSunnyDay_pz, TropicalSunnyDay_nx, TropicalSunnyDay_ny, TropicalSunnyDay_nz], 
-    //   GlobalManager.scene
-    // );
-    // const skybox = MeshBuilder.CreateBox("skyBox", { size: 100.0 }, GlobalManager.scene);
-    // const skyboxMaterial = new StandardMaterial("skyBox", GlobalManager.scene);
-    // skyboxMaterial.backFaceCulling = false;
-    // skyboxMaterial.disableLighting = true;
-    // skybox.material = skyboxMaterial;
+    let skyboxTexture = CubeTexture.CreateFromImages(
+      [TropicalSunnyDay_px, TropicalSunnyDay_py, TropicalSunnyDay_pz, TropicalSunnyDay_nx, TropicalSunnyDay_ny, TropicalSunnyDay_nz], 
+      GlobalManager.scene
+    );
+    const skybox = MeshBuilder.CreateBox("skyBox", { size: 100.0 }, GlobalManager.scene);
+    const skyboxMaterial = new StandardMaterial("skyBox", GlobalManager.scene);
+    skyboxMaterial.backFaceCulling = false;
+    skyboxMaterial.disableLighting = true;
+    skybox.material = skyboxMaterial;
     // skybox.infiniteDistance = true;
     // skyboxMaterial.disableLighting = true;
-    // skyboxMaterial.reflectionTexture = skyboxTexture;
-    // skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
+    skyboxMaterial.reflectionTexture = skyboxTexture;
+    skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
 
 
     // Ground
-    let groundMaterial = new StandardMaterial("groundMaterial", GlobalManager.scene);
+    let groundMaterial = new StandardMaterial(
+      "groundMaterial",
+      GlobalManager.scene
+    );
     groundMaterial.diffuseTexture = new Texture(floorUrl, GlobalManager.scene);
-    groundMaterial.diffuseTexture.uScale = groundMaterial.diffuseTexture.vScale = 4;
+    groundMaterial.diffuseTexture.uScale =
+      groundMaterial.diffuseTexture.vScale = 4;
 
-    let ground = Mesh.CreateGround("ground", this.mapsize, this.mapsize, 32, GlobalManager.scene, false);
+    let ground = Mesh.CreateGround(
+      "ground",
+      this.mapsize,
+      this.mapsize,
+      32,
+      GlobalManager.scene,
+      false
+    );
     ground.position.y = -1;
     ground.material = groundMaterial;
 
     // Water
-    let waterMesh = Mesh.CreateGround("waterMesh", this.mapsize, this.mapsize, 32, GlobalManager.scene, false);
+    let waterMesh = Mesh.CreateGround(
+      "waterMesh",
+      this.mapsize,
+      this.mapsize,
+      32,
+      GlobalManager.scene,
+      false
+    );
 
     let water = new WaterMaterial("water", GlobalManager.scene);
     water.bumpTexture = new Texture(waterUrl, GlobalManager.scene);
@@ -175,10 +210,7 @@ class Game {
 
     // Assign the water material
     waterMesh.material = water;
-
   }
-
-
 }
 
 export default Game;
