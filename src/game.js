@@ -1,4 +1,5 @@
 import {
+  FreeCamera,
   FollowCamera,
   HemisphericLight,
   MeshBuilder,
@@ -19,7 +20,12 @@ import { Inspector } from "@babylonjs/inspector";
 import { WaterMaterial } from "@babylonjs/materials";
 //Texture :
 import floorUrl from "../assets/textures/ground.jpg";
-import skyhUrl from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay.jpg";
+import TropicalSunnyDay_px from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_px.jpg";
+import TropicalSunnyDay_nx from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_nx.jpg";
+import TropicalSunnyDay_py from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_py.jpg";
+import TropicalSunnyDay_ny from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_ny.jpg";
+import TropicalSunnyDay_pz from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_pz.jpg";
+import TropicalSunnyDay_nz from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_nz.jpg";
 import waterUrl from "../assets/textures/waterbump.png";
 
 import Player from './player';
@@ -74,8 +80,6 @@ class Game {
     await this.player.init();
    
     GlobalManager.camera.lockedTarget = this.player.mesh;
-
-    Inspector.Show(GlobalManager.scene, Game)
     GlobalManager.engine.hideLoadingUI();
 
     //TODO : le bloc suivant à supprimer
@@ -121,20 +125,25 @@ class Game {
 
     // Attacher la caméra au canvas sans permettre le contrôle utilisateur
     GlobalManager.camera.attachControl(this.canvas, true);
-    GlobalManager.camera.inputs.clear(); 
+    // GlobalManager.camera.inputs.clear(); 
 
     let light = new HemisphericLight("light1", new Vector3(0, 1, 0), GlobalManager.scene);
 
     // Skybox
-    let skybox = Mesh.CreateBox("skyBox", 1000.0, GlobalManager.scene);
-    let skyboxMaterial = new StandardMaterial("skyBox", GlobalManager.scene);
-    skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.reflectionTexture = new Texture(skyhUrl, GlobalManager.scene);
-    skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
-    skyboxMaterial.diffuseColor = new Color3(0, 0, 0);
-    skyboxMaterial.specularColor = new Color3(0, 0, 0);
-    skyboxMaterial.disableLighting = true;
-    skybox.material = skyboxMaterial;
+    // let skyboxTexture = CubeTexture.CreateFromImages(
+    //   [TropicalSunnyDay_px, TropicalSunnyDay_py, TropicalSunnyDay_pz, TropicalSunnyDay_nx, TropicalSunnyDay_ny, TropicalSunnyDay_nz], 
+    //   GlobalManager.scene
+    // );
+    // const skybox = MeshBuilder.CreateBox("skyBox", { size: 100.0 }, GlobalManager.scene);
+    // const skyboxMaterial = new StandardMaterial("skyBox", GlobalManager.scene);
+    // skyboxMaterial.backFaceCulling = false;
+    // skyboxMaterial.disableLighting = true;
+    // skybox.material = skyboxMaterial;
+    // skybox.infiniteDistance = true;
+    // skyboxMaterial.disableLighting = true;
+    // skyboxMaterial.reflectionTexture = skyboxTexture;
+    // skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
+
 
     // Ground
     let groundMaterial = new StandardMaterial("groundMaterial", GlobalManager.scene);
@@ -161,7 +170,7 @@ class Game {
     water.waveLength = 0.1;
 
     // Add skybox and ground to the reflection and refraction
-    water.addToRenderList(skybox);
+    // water.addToRenderList(skybox);
     water.addToRenderList(ground);
 
     // Assign the water material
