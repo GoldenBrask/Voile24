@@ -53,8 +53,8 @@ const LEVELS = {
   height: 40,
   rows: [
     "                BBBBB                   ",
-    "                B S B                   ",
     "                B   B                   ",
+    "                B S B                   ",
     "                B   B BBBBBBBBBBBBB     ",
     "                B   B B  Q   Q    B     ",
     "                B   BBB     BBB   B     ",
@@ -175,7 +175,7 @@ class Game {
           case "S":
             this.spawnPoint = new Vector3(
               x * scaleFactor - this.mapsize / 2,
-              3,
+              4,
               y * scaleFactor - this.mapsize / 2
             ).clone();
             this.player = new Player(this.spawnPoint);
@@ -424,7 +424,7 @@ class Game {
             mountain = new Mountain(
               new Vector3(
                 x * scaleFactor - this.mapsize / 2,
-                0,
+                2,
                 y * scaleFactor - this.mapsize / 2
               )
             );
@@ -441,7 +441,7 @@ class Game {
             wall.checkCollisions = true;
             wall.position = new Vector3(
               x * scaleFactor - this.mapsize / 2,
-              2.5,
+              4.5,
               y * scaleFactor - this.mapsize / 2
             );
             // wall.scaling = new Vector3(0.8335, 1, 0.0005);
@@ -559,7 +559,7 @@ class Game {
     this.drawLevel();
 
     const weather = new Weather(this.player);
-    weather.setWeather(1);
+    weather.setWeather(2);
     let player2 = new Player(new Vector3(5, 3, 0));
     await player2.init();
 
