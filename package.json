@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "babylonjs": "^7.0.0",
+    "cannon": "^0.6.2",
     "eslint-plugin-import": "^2.29.1",
     "gh-pages": "^6.1.1"
   },
