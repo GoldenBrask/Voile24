@@ -8,26 +8,15 @@ import {
   SceneLoader,
   Vector2,
   KeyboardEventTypes,
-  Color3,
-  CubeTexture,
-  Mesh,
-  StandardMaterial,
-  Texture,
 } from "@babylonjs/core";
-
 import { Inspector } from "@babylonjs/inspector";
-import { WaterMaterial } from "@babylonjs/materials";
-//Texture :
-import floorUrl from "../assets/textures/ground.jpg";
-import TropicalSunnyDay_px from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_px.jpg";
-import TropicalSunnyDay_nx from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_nx.jpg";
-import TropicalSunnyDay_py from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_py.jpg";
-import TropicalSunnyDay_ny from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_ny.jpg";
-import TropicalSunnyDay_pz from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_pz.jpg";
-import TropicalSunnyDay_nz from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_nz.jpg";
-import waterUrl from "../assets/textures/waterbump.png";
-import Player from "./player";
 import { GlobalManager } from "./globalmanager";
+// import { ThinRenderTargetTexture } from "babylonjs"; Bassem : à quoi il sert ?
+
+import Player from "./player";
+import Weather from "./weather";
+
+
 
 class Game {
   canvas;
@@ -71,24 +60,21 @@ class Game {
     GlobalManager.engine.displayLoadingUI();
     await this.createScene();
     this.initKeyboard();
-    this.player = new Player(new Vector3(0, 3, 0));
+    this.player = new Player(new Vector3(0, 4, 0));
     await this.player.init();
+
 
     GlobalManager.camera.lockedTarget = this.player.mesh;
 
+    const weather = new Weather(this.player);
+    weather.setWeather(1);
     let player2 = new Player(new Vector3(5, 3, 0));
     await player2.init();
 
     let player3 = new Player(new Vector3(10, 3, 0));
     await player3.init();
 
-    const box = MeshBuilder.CreateBox("box", {
-      height: 75,
-      width: 75,
-      depth: 5,
-    });
-    box.checkCollisions = true;
-    box.position = new Vector3(0, 3, 0);
+
 
     GlobalManager.engine.hideLoadingUI();
 
@@ -127,15 +113,15 @@ class Game {
       0
     );
 
+
+    //Camera
     GlobalManager.camera = new FollowCamera(
       "followCam1",
-      new Vector3(0, 5, -10),
+      new Vector3(0, 0, 0),
       GlobalManager.scene
     );
-
-    // Configurer la caméra
-    GlobalManager.camera.radius = 11; // Distance de la cible
-    GlobalManager.camera.heightOffset = 2; // Hauteur par rapport à la cible
+    GlobalManager.camera.radius = 12; // Distance de la cible
+    GlobalManager.camera.heightOffset = 3; // Hauteur par rapport à la cible
     GlobalManager.camera.rotationOffset = 180; // Rotation de 90 degrés autour de la cible
     GlobalManager.camera.attachControl(this.canvas, true);
     GlobalManager.camera.inputs.clear(); // Supprimer les inputs par défaut
@@ -146,70 +132,8 @@ class Game {
       GlobalManager.scene
     );
 
-    // Skybox
-    let skyboxTexture = CubeTexture.CreateFromImages(
-      [TropicalSunnyDay_px, TropicalSunnyDay_py, TropicalSunnyDay_pz, TropicalSunnyDay_nx, TropicalSunnyDay_ny, TropicalSunnyDay_nz], 
-      GlobalManager.scene
-    );
-    const skybox = MeshBuilder.CreateBox("skyBox", { size: 100.0 }, GlobalManager.scene);
-    const skyboxMaterial = new StandardMaterial("skyBox", GlobalManager.scene);
-    skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.disableLighting = true;
-    skybox.material = skyboxMaterial;
-    // skybox.infiniteDistance = true;
-    // skyboxMaterial.disableLighting = true;
-    skyboxMaterial.reflectionTexture = skyboxTexture;
-    skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
 
 
-    // Ground
-    let groundMaterial = new StandardMaterial(
-      "groundMaterial",
-      GlobalManager.scene
-    );
-    groundMaterial.diffuseTexture = new Texture(floorUrl, GlobalManager.scene);
-    groundMaterial.diffuseTexture.uScale =
-      groundMaterial.diffuseTexture.vScale = 4;
-
-    let ground = Mesh.CreateGround(
-      "ground",
-      this.mapsize,
-      this.mapsize,
-      32,
-      GlobalManager.scene,
-      false
-    );
-    ground.position.y = -1;
-    ground.material = groundMaterial;
-
-    // Water
-    let waterMesh = Mesh.CreateGround(
-      "waterMesh",
-      this.mapsize,
-      this.mapsize,
-      32,
-      GlobalManager.scene,
-      false
-    );
-
-    let water = new WaterMaterial("water", GlobalManager.scene);
-    water.bumpTexture = new Texture(waterUrl, GlobalManager.scene);
-
-    // Water properties
-    water.windForce = -35;
-    water.waveHeight = 0.05;
-    water.windDirection = new Vector2(1, 1);
-    water.waterColor = new Color3(0.1, 0.1, 0.6);
-    water.colorBlendFactor = 0.3;
-    water.bumpHeight = 0.04;
-    water.waveLength = 0.1;
-
-    // Add skybox and ground to the reflection and refraction
-    // water.addToRenderList(skybox);
-    water.addToRenderList(ground);
-
-    // Assign the water material
-    waterMesh.material = water;
   }
 }
 

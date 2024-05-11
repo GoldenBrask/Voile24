@@ -1,3 +1,4 @@
+// import seaSound from
 import { Quaternion, SceneLoader, TransformNode, Vector3, Color3 } from '@babylonjs/core';
 import { GlobalManager } from './globalmanager';
 import { PhysicsImpostor } from '@babylonjs/core/Physics/physicsImpostor';
@@ -5,7 +6,7 @@ import { PhysicsImpostor } from '@babylonjs/core/Physics/physicsImpostor';
 import playerMeshUrl from "../assets/models/yacht.glb";
 import { Mesh, MeshBuilder } from 'babylonjs';
 
-const SPEED = 30.0;
+const SPEED = 15;
 const TURN_SPEED = 2*Math.PI;
 const BOUNCE_HEIGHT = 0.2;
 const DEBUG_COLLISION = false;
@@ -99,16 +100,24 @@ class Player {
         if (inputMap["KeyA"]) {
             this.moveInput.x = -1;
             this.moveInput.z = 1;
+
+
+
         }
         else if (inputMap["KeyD"]) {
             this.moveInput.x = 1;
             this.moveInput.z = 1;
+
+
+
         }
 
         
         if (inputMap["KeyW"]) {
             this.moveInput.z = 1;
             this.moveInput.y = 1;
+
+
         }
 
         if (actions["Space"]) {
