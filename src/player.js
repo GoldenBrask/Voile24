@@ -11,8 +11,8 @@ import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
 import playerMeshUrl from "../assets/models/yacht.glb";
 import { Mesh, MeshBuilder } from "babylonjs";
 
-const SPEED = 50.0;
-const TURN_SPEED = 4 * Math.PI;
+const SPEED = 15;
+const TURN_SPEED = 2*Math.PI;
 const BOUNCE_HEIGHT = 0.2;
 const DEBUG_COLLISION = true;
 class Player {

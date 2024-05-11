@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@babylonjs/post-processes": "^7.6.0",
     "babylonjs": "^7.0.0",
     "cannon": "^0.6.2",
     "eslint-plugin-import": "^2.29.1",
