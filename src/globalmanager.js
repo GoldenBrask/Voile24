@@ -13,6 +13,7 @@ class GlobalManager {
   shadowGenerators = [];
 
   deltaTime;
+  choiceWeather;
 
   gravityVector = new Vector3(0, 0, 0);
   States = Object.freeze({

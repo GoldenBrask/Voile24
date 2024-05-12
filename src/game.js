@@ -519,7 +519,7 @@ class Game {
     await this.drawLevel(this.player);
 
     const weather = new Weather(this.player);
-    await weather.setWeather(GlobalManager.currentWeather);
+    await weather.setWeather(GlobalManager.weatherChoice);
    
     GlobalManager.engine.hideLoadingUI();
 
@@ -592,8 +592,8 @@ class Game {
       new Vector3(0, 0, 0),
       GlobalManager.scene
     );
-    GlobalManager.camera.radius = 11; // Distance de la cible
-    GlobalManager.camera.heightOffset = 3; // Hauteur par rapport à la cible
+    GlobalManager.camera.radius = 12; // Distance de la cible
+    GlobalManager.camera.heightOffset = 4; // Hauteur par rapport à la cible
     GlobalManager.camera.rotationOffset = 180; // Rotation de 90 degrés autour de la cible
     GlobalManager.camera.attachControl(this.canvas, true);
     GlobalManager.camera.inputs.clear(); // Supprimer les inputs par défaut

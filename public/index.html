@@ -6,92 +6,46 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Voile24</title>
   <link rel="icon" type="image/x-icon" href="./favicon.ico">
-  <style>
-    html,
-    body {
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    #renderCanvas {
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-
-    #fps {
-      position: absolute;
-      background-color: black;
-      border: 2px solid red;
-      text-align: center;
-      font-size: 16px;
-      color: white;
-      top: 15px;
-      right: 10px;
-      width: 60px;
-      height: 20px;
-    }
-
-    #timeContainer {
-      position: absolute;
-      background-color: rgb(82, 151, 230);
-      border: 2px solid rgb(0, 0, 0);
-      border-radius: 4px;
-      padding: 1px;
-      text-align: center;
-      font-size: 16px;
-      color: rgb(255, 250, 250);
-      top: 15px;
-      left: 10px;
-      width: 100px;
-      height: 40px;
-    }
-
-    #countDownContainer {
-      display: block;
-      position: absolute;
-      font-size: 20vw;
-      color: #ca0a0a;
-      text-align: center;
-      left: 43%;
-      top: 10%;
-      width: 100px;
-      height: 20px;
-      border-radius: 15px;
-    }
-
-    #loader {
-      display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-color: #017BAD;
-      z-index: 1000;
-
-      p {
-        color: white;
-        font-size: 20px;
-        font-weight: bold;
-        letter-spacing: 2px;
-        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-      }
-    }
-
-    #logo {
-      width: 300px;
-      height: 300px;
-      margin-top: -20px;
-    }
-  </style>
+  <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
+
+  <div id="gui">
+    <img id="backgroundImage">
+
+    <div id="menu">
+
+      <div id="buttonContainer">
+        <button id="playButton" class="menuButton">PLAY</button>
+        <!-- <button id="controlsButton" class="menuButton">CONTROLS</button>
+        <button id="creditsButton" class="menuButton">CREDITS</button> -->
+      </div>
+
+    </div>
+
+    <div id="choicesUser">
+
+      <div id="weather" class="settingSection">
+        <span class="titleSection">Weather</span>
+        <button id="sunny" class="settingMapButton">☀️</button>
+        <button id="rainy" class="settingMapButton">🌧️</button>
+      </div>
+
+      <div id="circuit" class="settingSection">
+        <span class="titleSection">Circuit</span>
+        <button id="circuit1" class="settingMapButton">1</button>
+        <button id="circuit2" class="settingMapButton">2</button>
+      </div>
+
+      <button id="buttonGo" class="settingMapButton">GO !</button>
+
+    </div>
+  </div>
+
+
+
+
   <div id="loader">
     <div id="loadingContainer">
       <img src="../assets/images/logo.png" alt="" id="logo">
@@ -100,7 +54,6 @@
     <p>Chargement</p>
     <p id="percentLoaded">25%</p>
   </div>
-  
   <canvas id="renderCanvas" touch-action="none"></canvas>
   <div id="fps" >0</div>
   <div id="timeContainer">
