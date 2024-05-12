@@ -559,7 +559,7 @@ class Game {
     await this.drawLevel();
 
     const weather = new Weather(this.player);
-    await weather.setWeather(1);
+    await weather.setWeather(2);
    
     GlobalManager.engine.hideLoadingUI();
 

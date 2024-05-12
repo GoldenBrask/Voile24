@@ -16,7 +16,7 @@ import { Mesh, MeshBuilder } from "babylonjs";
 import boatWake from "../assets/textures/boatWake.png";
 
 const SPEED = 40;
-const TURN_SPEED = 1.5*Math.PI;
+const TURN_SPEED = 2*Math.PI;
 const DEBUG_COLLISION = false;
 class Player {
   scorehit = 0;
@@ -127,19 +127,16 @@ class Player {
 
     if (inputMap["KeyA"]) {
       this.moveInput.x = -1;
-      this.moveInput.z = 1;
       this.boatWakeParticle.minSize = 0;
       this.boatWakeParticle.maxSize = 0.3;
     } else if (inputMap["KeyD"]) {
       this.moveInput.x = 1;
-      this.moveInput.z = 1;
       this.boatWakeParticle.minSize = 0;
       this.boatWakeParticle.maxSize = 0.3;
     }
 
     if (inputMap["KeyW"]) {
       this.moveInput.z = 1;
-      this.moveInput.y = 1;
       this.boatWakeParticle.minSize = 0;
       this.boatWakeParticle.maxSize = 0.3;
     }
