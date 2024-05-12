@@ -44,7 +44,7 @@ class Weather {
 
     }
   
-    setWeather(choice) {
+    async setWeather(choice) {
       switch (choice) {
         case 1:
           this.setupWeather1();
