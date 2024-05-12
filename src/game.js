@@ -18,20 +18,9 @@ import {
   PhysicsImpostor,
 } from "@babylonjs/core";
 
-import * as CANNON from "cannon";
+
 
 import { Inspector } from "@babylonjs/inspector";
-import { WaterMaterial } from "@babylonjs/materials";
-//Texture :
-import floorUrl from "../assets/textures/ground.jpg";
-import TropicalSunnyDay_px from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_px.jpg";
-import TropicalSunnyDay_nx from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_nx.jpg";
-import TropicalSunnyDay_py from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_py.jpg";
-import TropicalSunnyDay_ny from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_ny.jpg";
-import TropicalSunnyDay_pz from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_pz.jpg";
-import TropicalSunnyDay_nz from "../assets/textures/TropicalSunnyDay/TropicalSunnyDay_nz.jpg";
-import waterUrl from "../assets/textures/waterbump.png";
-import startUrl from "../assets/models/starting_line.glb";
 import finishUrl from "../assets/models/finish_line.glb";
 import mountain1MeshUrl from "../assets/models/mountain1.glb";
 import mountain2MeshUrl from "../assets/models/mountain2.glb";
@@ -43,7 +32,6 @@ import Mountain from "./moutain";
 import Decors from "./decors";
 import Buoy from "./buoy";
 import { GlobalManager } from "./globalmanager";
-import { CannonJSPlugin } from "babylonjs";
 import Weather from "./weather";
 
 //TODO : VARIABLE LEVELs
@@ -556,15 +544,10 @@ class Game {
     this.initKeyboard();
     // MANQUE LA GESTION DES STATES
     await this.loadLevel(LEVELS);
-    this.drawLevel();
+    await this.drawLevel();
 
     const weather = new Weather(this.player);
-    weather.setWeather(2);
-    let player2 = new Player(new Vector3(5, 3, 0));
-    await player2.init();
-
-    let player3 = new Player(new Vector3(10, 3, 0));
-    await player3.init();
+    weather.setWeather(1);
 
 
     GlobalManager.engine.hideLoadingUI();
@@ -621,7 +604,6 @@ class Game {
     // );
     GlobalManager.scene.enablePhysics(
       new Vector3(0, -9.81, 0),
-      new CannonJSPlugin(true, 10, CANNON)
     );
 
 
@@ -632,7 +614,7 @@ class Game {
       GlobalManager.scene
     );
     GlobalManager.camera.radius = 12; // Distance de la cible
-    GlobalManager.camera.heightOffset = 3; // Hauteur par rapport à la cible
+    GlobalManager.camera.heightOffset = 4; // Hauteur par rapport à la cible
     GlobalManager.camera.rotationOffset = 180; // Rotation de 90 degrés autour de la cible
     GlobalManager.camera.attachControl(this.canvas, true);
     GlobalManager.camera.inputs.clear(); // Supprimer les inputs par défaut

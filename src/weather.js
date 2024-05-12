@@ -10,6 +10,7 @@ import {
   Texture,
   ParticleSystem,
   Sound,
+  HemisphericLight
 
 } from "@babylonjs/core";
 import { GlobalManager } from "./globalmanager";
@@ -82,33 +83,18 @@ class Weather {
       ground.material = groundMaterial;
   
   
-  
       // Water
-      // let waterMesh = Mesh.CreateGround("waterMesh", 2048, 2048, 16, GlobalManager.scene, false);
-      // let water = new WaterMaterial("water", GlobalManager.scene, new Vector2(512, 512));
-      // water.backFaceCulling = true;
-      // water.bumpTexture = new Texture(waterUrl, GlobalManager.scene);
-      // water.windForce = -12;
-      // water.waveHeight = 0.1;
-      // water.windDirection = new Vector2(1, 1);
-      // water.waterColor = new Color3(0.19, 0.19, 0.55);
-      // water.colorBlendFactor = 0.5;
-      // water.bumpHeight = 0.1; 
-      // water.waveLength = 0.1;
-      // water.addToRenderList(skybox);
-      // water.addToRenderList(ground);
-      // waterMesh.material = water;
       let waterMesh = Mesh.CreateGround("waterMesh", 2048, 2048, 16, GlobalManager.scene, false);
-      let water = new WaterMaterial("water", GlobalManager.scene, new Vector2(512, 512));
+      let water = new WaterMaterial("water", GlobalManager.scene);
       water.backFaceCulling = true;
       water.bumpTexture = new Texture(waterUrl, GlobalManager.scene);
-      water.windForce = -15;
+      water.windForce = -5;
       water.waveHeight = 0.2;
       water.windDirection = new Vector2(1, 1);
-      water.waterColor = new Color3(0.22, 0.22, 0.54);
-      water.colorBlendFactor = 0.7;
-      water.bumpHeight = 0.2; 
-      water.waveLength = 0.5;
+      water.waterColor = new Color3(0.09, 0.31, 0.35);
+      water.colorBlendFactor = 0.9;
+      water.bumpHeight = 0.1;
+      water.waveLength = 0.1;
       water.addToRenderList(skybox);
       water.addToRenderList(ground);
       waterMesh.material = water;
@@ -143,58 +129,60 @@ class Weather {
     groundMaterial.diffuseTexture.uScale = groundMaterial.diffuseTexture.vScale = 4;
 
     let ground = Mesh.CreateGround("ground", 2000, 2000, 32, GlobalManager.scene, false);
-    ground.position.y = -1;
+    ground.position.y = -10;
     ground.material = groundMaterial;
 
 
 
     // Water
     let waterMesh = Mesh.CreateGround("waterMesh", 2048, 2048, 16, GlobalManager.scene, false);
-    let water = new WaterMaterial("water", GlobalManager.scene, new Vector2(512, 512));
+    let water = new WaterMaterial("water", GlobalManager.scene);
     water.backFaceCulling = true;
     water.bumpTexture = new Texture(waterUrl, GlobalManager.scene);
-    water.windForce = -15;
+    water.windForce = -6;
     water.waveHeight = 0.2;
     water.windDirection = new Vector2(1, 1);
-    water.waterColor = new Color3(0.3, 0.3, 0.4);
-    water.colorBlendFactor = 0.5;
-    water.bumpHeight = 0.5; 
-    water.waveLength = 0.5;
+    water.waterColor = new Color3(0.11, 0.21, 0.28);
+    water.colorBlendFactor = 0.7;
+    water.bumpHeight = 0.1;
+    water.waveLength = 0.1;
     water.addToRenderList(skybox);
     water.addToRenderList(ground);
     waterMesh.material = water;
 
+    this.player.bounce_height = 0.4;
+
     // Rain
-    var particleSystem = new ParticleSystem("rain", 1500, GlobalManager.scene);
+    let particleSystem = new ParticleSystem("rain", 1000, GlobalManager.scene);
     particleSystem.particleTexture = new Texture(rainDrop, GlobalManager.scene);
     particleSystem.emitter = this.player.mesh;
-    particleSystem.minEmitBox = new Vector3(-50, 30, 20);
-    particleSystem.maxEmitBox = new Vector3(50, 30, 50);
-    particleSystem.color1 = new Color4(1, 1, 1);
-    particleSystem.color2 = new Color4(0, 0, 0, 0);
-    particleSystem.colorDead = new Color4(0, 0, 0.2, 0.0); 
+    particleSystem.minEmitBox = new Vector3(-55, 30, 10);
+    particleSystem.maxEmitBox = new Vector3(55, 30, 60);
+    particleSystem.color1 = new Color4(0.7, 0.7, 0.7);
+    particleSystem.color2 = new Color4(0.3, 0.3, 0.3);
+    particleSystem.colorDead = new Color4(0, 0, 0, 0); 
     particleSystem.minSize = 0.05;
-    particleSystem.maxSize = 0.4;
+    particleSystem.maxSize = 0.3;
     particleSystem.minLifeTime = 1;
     particleSystem.maxLifeTime = 4;
-    particleSystem.emitRate = 500;
+    particleSystem.emitRate = 450;
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ONEONE;
     particleSystem.gravity = new Vector3(0, -9.81, 0);
     particleSystem.minEmitPower = 0.5;
     particleSystem.maxEmitPower = 1.0;
-    particleSystem.updateSpeed = 0.025;
-    // particleSystem.direction1 = new Vector3(0, -10, 0); // Direction de départ
-    // particleSystem.direction2 = new Vector3(0, -10, 0); // Direction de fin
+    particleSystem.updateSpeed = 0.03;
+    particleSystem.direction1 = new Vector3(0, -10, 0); // Direction de départ
+    particleSystem.direction2 = new Vector3(0, -10, 5); // Direction de fin
 
     particleSystem.start();
 
 
 
-//Sound of the rain
-let rainSound = new Sound("rainSound", rainFileSound, GlobalManager.scene, null, { loop: true, autoplay: true });
-rainSound.setVolume(0.6);
-let rainSound2 = new Sound("rainSound2", rainFileSound2, GlobalManager.scene, null, { loop: true, autoplay: true });
-rainSound2.setVolume(0.6);
+  //Sound of the rain
+  let rainSound = new Sound("rainSound", rainFileSound, GlobalManager.scene, null, { loop: true, autoplay: true });
+  rainSound.setVolume(0.6);
+  let rainSound2 = new Sound("rainSound2", rainFileSound2, GlobalManager.scene, null, { loop: true, autoplay: true });
+  rainSound2.setVolume(0.6);
 
 
   }

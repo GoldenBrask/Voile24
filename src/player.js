@@ -4,17 +4,20 @@ import {
   TransformNode,
   Vector3,
   Color3,
+  Color4,
+  ParticleSystem,
+  Texture
 } from "@babylonjs/core";
 import { GlobalManager } from "./globalmanager";
 import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
 
 import playerMeshUrl from "../assets/models/yacht.glb";
 import { Mesh, MeshBuilder } from "babylonjs";
+import boatWake from "../assets/textures/boatWake.png";
 
 const SPEED = 40;
 const TURN_SPEED = 1.5*Math.PI;
-const BOUNCE_HEIGHT = 0.2;
-const DEBUG_COLLISION = true;
+const DEBUG_COLLISION = false;
 class Player {
   scorehit = 0;
 
@@ -22,8 +25,14 @@ class Player {
 
   spawnPoint;
 
+    
   positiony;
   phase = 0.0;
+
+  bounce_height = 0.2;
+
+  boatWakeParticle;
+
 
   //Vecteur d'input
   moveInput = new Vector3(0, 0, 0);
@@ -58,7 +67,10 @@ class Player {
         childMesh.receiveShadows = true;
         GlobalManager.addShadowCaster(childMesh);
       }
+
     }
+    // Add boat wake (ajout du sillage)
+    this.boatWake();
 
     this.mesh.ellipsoid = new Vector3(2, 3, 2);
     const ellipsoidOffset = 0.0;
@@ -104,24 +116,32 @@ class Player {
     this.move();
 
     this.phase += 1.9 * GlobalManager.deltaTime;
-    this.mesh.position.y =
-      this.positiony + Math.sin(this.phase) * BOUNCE_HEIGHT; // Appliquer l'oscillation autour de la position de base
+    this.mesh.position.y = this.positiony + Math.sin(this.phase) * this.bounce_height; // Appliquer l'oscillation autour de la position de base
   }
 
   getInputs(inputMap, actions) {
     this.moveInput.set(0, 0, 0);
 
+    this.boatWakeParticle.minSize = 0;
+    this.boatWakeParticle.maxSize = 0;
+
     if (inputMap["KeyA"]) {
       this.moveInput.x = -1;
       this.moveInput.z = 1;
+      this.boatWakeParticle.minSize = 0;
+      this.boatWakeParticle.maxSize = 0.3;
     } else if (inputMap["KeyD"]) {
       this.moveInput.x = 1;
       this.moveInput.z = 1;
+      this.boatWakeParticle.minSize = 0;
+      this.boatWakeParticle.maxSize = 0.3;
     }
 
     if (inputMap["KeyW"]) {
       this.moveInput.z = 1;
       this.moveInput.y = 1;
+      this.boatWakeParticle.minSize = 0;
+      this.boatWakeParticle.maxSize = 0.3;
     }
 
     if (actions["Space"]) {
@@ -205,6 +225,44 @@ class Player {
     let right_local = _mesh.getDirection(Vector3.RightReadOnly);
     return right_local.normalize();
   }
+
+  boatWake(){
+    
+    let attachedMeshNode = new TransformNode("attachedMeshNode", GlobalManager.scene);
+    let attachedMesh = MeshBuilder.CreateBox("attachedMeshBoatWake", {size: 0.01}, GlobalManager.scene);
+    attachedMeshNode.position = new Vector3(0, -2, -3,5);
+    attachedMeshNode.rotation = new Vector3(0, Math.PI, 0);
+    attachedMesh.parent = attachedMeshNode;
+    attachedMeshNode.parent = this.mesh;
+
+    this.boatWakeParticle = new ParticleSystem("boatWake", 1000, GlobalManager.scene);
+    this.boatWakeParticle.particleTexture = new Texture(boatWake, GlobalManager.scene);
+    this.boatWakeParticle.emitter = attachedMesh;
+    this.boatWakeParticle.color1 = new Color4(0.7, 0.7, 0.7);
+    this.boatWakeParticle.color2 = new Color4(0.3, 0.3, 0.3);
+    this.boatWakeParticle.colorDead = new Color4(0, 0, 0, 0); 
+    this.boatWakeParticle.minSize = 0;
+    this.boatWakeParticle.maxSize = 0.3;
+    this.boatWakeParticle.minLifeTime = 1;
+    this.boatWakeParticle.maxLifeTime = 4;
+    this.boatWakeParticle.emitRate = 450;
+    this.boatWakeParticle.createPointEmitter(new Vector3(-15, -5, -10), new Vector3(15, -5, -25));
+    this.boatWakeParticle.blendMode = ParticleSystem.BLENDMODE_ONEONE;
+    this.boatWakeParticle.gravity = new Vector3(0, -9.81, 0);
+    this.boatWakeParticle.minEmitPower = 0.5;
+    this.boatWakeParticle.maxEmitPower = 1.0;
+    this.boatWakeParticle.updateSpeed = 0.03;
+    this.boatWakeParticle.direction1 = new Vector3(-6, 0, -5); // Direction de départ
+    this.boatWakeParticle.direction2 = new Vector3(6, 0, -10); // Direction de fin
+  
+    this.boatWakeParticle.start();
+  }
+
+
+  
 }
+
+
+
 
 export default Player;
