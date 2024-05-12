@@ -6,7 +6,7 @@ class GlobalManager {
   scene;
   camera;
   lights = [];
-  currentLevel = 0;
+  currentLevel = 1;
   currentWeather = 1;
   gameState ;
 

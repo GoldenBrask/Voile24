@@ -197,9 +197,8 @@ class Player {
       : null;
     if (collidedMesh) {
       if (collidedMesh.name == "ENDWALL") {
-        const divHit = document.getElementById("hit");
-        alert("You hit the wall! Your score is: " + this.scorehit);
-        divHit.innerHTML = this.scorehit += 1;
+        GlobalManager.changeGameState(GlobalManager.States.STATE_END);
+        console.log("End of the game");
       }
     }
   }

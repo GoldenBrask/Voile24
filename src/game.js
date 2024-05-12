@@ -19,8 +19,9 @@ import {
 } from "@babylonjs/core";
 
 
-
 import { Inspector } from "@babylonjs/inspector";
+import { GlobalManager } from "./globalmanager";
+import { levels } from './levels';
 import CustomLoadingScreen   from "./customLoadingScreen.js";
 
 
@@ -37,58 +38,7 @@ import vogueMeshUrl from "../assets/models/vogueMery.glb";
 import chekered from "../assets/textures/checkered.png";
 import Player from "./player";
 import Mountain from "./moutain";
-import Buoy from "./buoy";
-import { GlobalManager } from "./globalmanager";
 import Weather from "./weather";
-
-//TODO : VARIABLE LEVELs
-const LEVELS = {
-  name: "level1",
-  width: 40,
-  height: 40,
-  rows: [
-    "                BBBBB                   ",
-    "                B   B                   ",
-    "                B S B                   ",
-    "                B C B BBBBBBBBBBBBB     ",
-    "                B P B B  Q   Q    B     ",
-    "                B L BBB     BBB   B     ",
-    " m              B          B   B  B     ",
-    "                BD D       B M B  B     ",
-    "                BBBBBBBBBBBB   B  B     ",
-    "                               B  B     ",
-    "                               B  B     ",
-    "       T                       B  B     ",
-    "                      O        B  B     ",
-    "                               B  B     ",
-    "                BBBBBBBBBBBBBBBB  B     ",
-    "                B                 B     ",
-    "        BBBBBBBBB                 B     ",
-    "        B                      Z  B     ",
-    "        B    BBBBBBBBBBBBBBBBBBBBBB     ",
-    "        B    B                          ",
-    "        B    BBBBB                      ",
-    "        BBB      BB            V        ",
-    "         BBBBBBB   BB                   ",
-    "               BB   BB                  ",
-    "                B     B                 ",
-    "                 BBB   B                ",
-    "                   BB   B               ",
-    "                    BB  BB              ",
-    "                     B   B              ",
-    "                     BB   B             ",
-    "      m              BB   B             ",
-    "                     BbbFbbB            ",
-    "                  BBBEEEEEEB            ",
-    "                  BBBBBBBBBB            ",
-    "                                        ",
-    "                                        ",
-    "                                        ",
-    "                                        ",
-    "                                        ",
-    "                                        ",
-  ],
-};
 
 class Game {
   canvas;
@@ -98,6 +48,10 @@ class Game {
   mapsize = 1000;
   phase = 0.0;
   camera;
+  startTimer = 0;
+  timerActive = false;
+
+  
 
   player;
   spawnPoint;
@@ -131,7 +85,8 @@ class Game {
   async start() {
     await this.initGame();
     this.gameLoop();
-    this.endGame();
+    // this.endGame();
+    
   }
   async loadLevel(level) {
     this.width = level.width;
@@ -147,7 +102,7 @@ class Game {
     }
   }
 
-  async drawLevel() {
+  async drawLevel(player) {
     const scaleFactor = this.mapsize / this.width; // 2000 / 40 = 50
     for (let y = 0; y < this.height; y++) {
       let currentRow = this.rows[y];
@@ -168,13 +123,12 @@ class Game {
 
         switch (currentCell) {
           case "S":
-            this.player = new Player( new Vector3(
+            player.mesh.position = new Vector3(
               x * scaleFactor - this.mapsize / 2,
               4,
               y * scaleFactor - this.mapsize / 2
-            ));
-            await this.player.init();
-            GlobalManager.camera.lockedTarget = this.player.mesh;
+            );
+            
             break;
           case "F":
             finishline = SceneLoader.ImportMeshAsync(
@@ -544,25 +498,28 @@ class Game {
     }
   }
 
-  disposeLevel() {
-    GlobalManager.scene.meshes.forEach((mesh) => {
-      if (mesh.name === "wall") {
-        mesh.dispose();
-      }
-    });
-  }
-
   async initGame() {
+    GlobalManager.gameState = GlobalManager.States.STATE_READY;
+
     GlobalManager.engine.loadingScreen = new CustomLoadingScreen();
     GlobalManager.engine.displayLoadingUI();
+
     await this.createScene();
+    this.player = new Player(new Vector3(
+     this.mapsize / 2,
+      4,
+     this.mapsize / 2
+    ));
+    await this.player.init();
+    GlobalManager.camera.lockedTarget = this.player.mesh;
     this.initKeyboard();
+
     // MANQUE LA GESTION DES STATES
-    await this.loadLevel(LEVELS);
-    await this.drawLevel();
+    await this.loadLevel(levels[GlobalManager.currentLevel]);
+    await this.drawLevel(this.player);
 
     const weather = new Weather(this.player);
-    await weather.setWeather(2);
+    await weather.setWeather(GlobalManager.currentWeather);
    
     GlobalManager.engine.hideLoadingUI();
 
@@ -572,20 +529,42 @@ class Game {
         Inspector.Show(this.gameScene, Game);
       }
     });
-  
-  }
 
-  endGame() {}
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "w" || event.key === "W") {
+        weather.setWeather(2);
+      }
+      if (event.key === " ") {
+        console.log("La touche espace a été pressée.");
+        this.startCountDown(); // Démarre le compte à rebours
+      }
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "e" || event.key === "E") {
+        weather.setWeather(1);
+      }
+    });
+
+  }
 
 
   gameLoop() {
+      
     const divFps = document.getElementById("fps");
     const time = document.getElementById("time");
     GlobalManager.engine.runRenderLoop(() => {
+      if(GlobalManager.gameState == GlobalManager.States.STATE_RUNNING) {
+        this.startTimer = this.startTimer + GlobalManager.deltaTime
+        this.updateGame();
+        
+      }
+      if(GlobalManager.gameState == GlobalManager.States.STATE_END) {
+        this.stopTimer();
+      }
+      time.innerHTML = this.startTimer.toFixed(2) + " secondes";
       GlobalManager.update();
-      this.updateGame();
       divFps.innerHTML = GlobalManager.engine.getFps().toFixed() + " fps";
-      // time.innerHTML = GlobalManager.deltaTime + "secondes";
       GlobalManager.scene.render();
     });
   }
@@ -597,8 +576,8 @@ class Game {
   }
 
   async createScene() {
+    //Scene
     GlobalManager.scene = new Scene(GlobalManager.engine);
-
     GlobalManager.scene.collisionsEnabled = true;
     const assumedFramesPerSecond = 60;
     GlobalManager.scene.gravity = new Vector3(
@@ -606,10 +585,6 @@ class Game {
       GlobalManager.gravityVector / assumedFramesPerSecond,
       0
     );
-    // GlobalManager.scene.enablePhysics(
-    //   new Vector3(0, -9.81, 0),
-    //   new CannonJSPlugin(true, 10, CANNON)
-    // );
 
     //Camera
     GlobalManager.camera = new FollowCamera(
@@ -622,13 +597,98 @@ class Game {
     GlobalManager.camera.rotationOffset = 180; // Rotation de 90 degrés autour de la cible
     GlobalManager.camera.attachControl(this.canvas, true);
     GlobalManager.camera.inputs.clear(); // Supprimer les inputs par défaut
+    GlobalManager.camera.position = new Vector3(0, 0, 0);
+    
 
-    let light = new HemisphericLight(
+
+    //Light
+    GlobalManager.addLight(new HemisphericLight(
       "light1",
       new Vector3(0, 1, 0),
       GlobalManager.scene
-    );
+    ));
   }
+
+  go() {
+    // Vérifie si le timer est déjà actif
+    if(GlobalManager.gameState == GlobalManager.States.STATE_READY) {
+      if (!this.timerActive) {
+        this.timerActive = true; // Active le timer
+        this.startTimer = 0; // Réinitialise le timer
+  
+        GlobalManager.changeGameState(GlobalManager.States.STATE_RUNNING);
+      } else {
+        console.log('Timer is already running.');
+      }
+    }
+    
+  }
+
+  stopTimer() {
+    this.timerActive = false; // Désactive le timer
+    console.log(`Timer stopped at ${this.startTimer.toFixed(2)} seconds.`);
+  }
+
+  endGame() {
+    // Arrêt de la boucle de rendu
+    GlobalManager.engine.stopRenderLoop();
+
+    // Dispose tous les meshes dans la scène
+    GlobalManager.scene.meshes.forEach(mesh => {
+        mesh.dispose();
+    });
+
+    // Dispose tous les sons dans la scène
+    GlobalManager.scene.soundTracks.forEach(soundTrack => {
+        soundTrack.soundCollection.forEach(sound => {
+            sound.dispose();
+        });
+    });
+
+    // Dispose tous les matériaux et textures
+    GlobalManager.scene.materials.forEach(material => {
+        material.dispose();
+    });
+    GlobalManager.scene.textures.forEach(texture => {
+        texture.dispose();
+    });
+
+    // Dispose la scène elle-même
+    GlobalManager.scene.dispose();
+
+    // Éventuellement réinitialiser des paramètres ou nettoyer des ressources supplémentaires
+    this.resetGame();
+}
+
+resetGame() {
+    // Réinitialise les variables du jeu si nécessaire
+    this.startTimer = 0;
+    this.timerActive = false;
+    // Autres réinitialisations au besoin
+}
+
+startCountDown() {
+  let display = document.getElementById('countDown');
+  console.log(display);
+  document.getElementById("countDownContainer").style.display = 'block'; // Afficher la div
+  let timer = 3, seconds;
+  let countdownInterval = setInterval(function () {
+    seconds = parseInt(timer % 60, 10);
+    display.textContent = seconds; // Met à jour le texte dans la div
+
+    if (--timer < 0) {
+      clearInterval(countdownInterval); // Arrête l'intervalle une fois le compte à rebours terminé
+      display.textContent = "0"; // Optionnel: afficher "Go!" à la fin
+     
+    }
+  }, 1000);
+  setTimeout(() => {
+    this.go();
+    document.getElementById("countDownContainer").style.display = 'none'; 
+  }, 4000); // 3 secondes
+  
+}
+
 }
 
 export default Game;
