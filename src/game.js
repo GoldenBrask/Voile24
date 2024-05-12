@@ -165,12 +165,11 @@ class Game {
 
         switch (currentCell) {
           case "S":
-            this.spawnPoint = new Vector3(
+            this.player = new Player( new Vector3(
               x * scaleFactor - this.mapsize / 2,
               4,
               y * scaleFactor - this.mapsize / 2
-            ).clone();
-            this.player = new Player(this.spawnPoint);
+            ));
             await this.player.init();
             GlobalManager.camera.lockedTarget = this.player.mesh;
             break;
@@ -569,20 +568,11 @@ class Game {
         Inspector.Show(this.gameScene, Game);
       }
     });
-    //TODO : le bloc suivant à supprimer
-    window.addEventListener("keydown", (event) => {
-      if (event.key === "r" || event.key === "R") {
-        this.respawn();
-      }
-    });
+  
   }
 
   endGame() {}
 
-  respawn() {
-    this.player.mesh.position = this.spawnPoint;
-    this.player.mesh.rotationQuaternion = Quaternion.Identity();
-  }
 
   gameLoop() {
     const divFps = document.getElementById("fps");

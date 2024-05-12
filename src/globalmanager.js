@@ -11,7 +11,7 @@ class GlobalManager {
 
   deltaTime;
 
-  gravityVector = new Vector3(0, -9.81, 0);
+  gravityVector = new Vector3(0, 0, 0);
 
   constructor() {}
 

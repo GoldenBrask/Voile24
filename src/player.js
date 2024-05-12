@@ -6,7 +6,7 @@ import {
   Color3,
   Color4,
   ParticleSystem,
-  Texture
+  Texture,
 } from "@babylonjs/core";
 import { GlobalManager } from "./globalmanager";
 import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
@@ -16,7 +16,7 @@ import { Mesh, MeshBuilder } from "babylonjs";
 import boatWake from "../assets/textures/boatWake.png";
 
 const SPEED = 40;
-const TURN_SPEED = 2*Math.PI;
+const TURN_SPEED =  2*Math.PI;
 const DEBUG_COLLISION = false;
 class Player {
   scorehit = 0;
@@ -25,14 +25,12 @@ class Player {
 
   spawnPoint;
 
-    
   positiony;
   phase = 0.0;
 
   bounce_height = 0.2;
 
   boatWakeParticle;
-
 
   //Vecteur d'input
   moveInput = new Vector3(0, 0, 0);
@@ -67,7 +65,6 @@ class Player {
         childMesh.receiveShadows = true;
         GlobalManager.addShadowCaster(childMesh);
       }
-
     }
     // Add boat wake (ajout du sillage)
     this.boatWake();
@@ -116,7 +113,8 @@ class Player {
     this.move();
 
     this.phase += 1.9 * GlobalManager.deltaTime;
-    this.mesh.position.y = this.positiony + Math.sin(this.phase) * this.bounce_height; // Appliquer l'oscillation autour de la position de base
+    this.mesh.position.y =
+      this.positiony + Math.sin(this.phase) * this.bounce_height; // Appliquer l'oscillation autour de la position de base
   }
 
   getInputs(inputMap, actions) {
@@ -158,7 +156,6 @@ class Player {
 
       //Recup le right de la camera
       let right = this.getRightVector(GlobalManager.camera);
-      right.y = 0;
       right.normalize();
       right.scaleInPlace(this.moveInput.x);
 
@@ -199,7 +196,6 @@ class Player {
       ? this.mesh.collider.collidedMesh
       : null;
     if (collidedMesh) {
-     
       if (collidedMesh.name == "ENDWALL") {
         const divHit = document.getElementById("hit");
         alert("You hit the wall! Your score is: " + this.scorehit);
@@ -223,27 +219,43 @@ class Player {
     return right_local.normalize();
   }
 
-  boatWake(){
-    
-    let attachedMeshNode = new TransformNode("attachedMeshNode", GlobalManager.scene);
-    let attachedMesh = MeshBuilder.CreateBox("attachedMeshBoatWake", {size: 0.01}, GlobalManager.scene);
-    attachedMeshNode.position = new Vector3(0, -2, -3,5);
+  boatWake() {
+    let attachedMeshNode = new TransformNode(
+      "attachedMeshNode",
+      GlobalManager.scene
+    );
+    let attachedMesh = MeshBuilder.CreateBox(
+      "attachedMeshBoatWake",
+      { size: 0.01 },
+      GlobalManager.scene
+    );
+    attachedMeshNode.position = new Vector3(0, -2, -3, 5);
     attachedMeshNode.rotation = new Vector3(0, Math.PI, 0);
     attachedMesh.parent = attachedMeshNode;
     attachedMeshNode.parent = this.mesh;
 
-    this.boatWakeParticle = new ParticleSystem("boatWake", 1000, GlobalManager.scene);
-    this.boatWakeParticle.particleTexture = new Texture(boatWake, GlobalManager.scene);
+    this.boatWakeParticle = new ParticleSystem(
+      "boatWake",
+      1000,
+      GlobalManager.scene
+    );
+    this.boatWakeParticle.particleTexture = new Texture(
+      boatWake,
+      GlobalManager.scene
+    );
     this.boatWakeParticle.emitter = attachedMesh;
     this.boatWakeParticle.color1 = new Color4(0.7, 0.7, 0.7);
     this.boatWakeParticle.color2 = new Color4(0.3, 0.3, 0.3);
-    this.boatWakeParticle.colorDead = new Color4(0, 0, 0, 0); 
+    this.boatWakeParticle.colorDead = new Color4(0, 0, 0, 0);
     this.boatWakeParticle.minSize = 0;
     this.boatWakeParticle.maxSize = 0.3;
     this.boatWakeParticle.minLifeTime = 1;
     this.boatWakeParticle.maxLifeTime = 4;
     this.boatWakeParticle.emitRate = 450;
-    this.boatWakeParticle.createPointEmitter(new Vector3(-15, -5, -10), new Vector3(15, -5, -25));
+    this.boatWakeParticle.createPointEmitter(
+      new Vector3(-15, -5, -10),
+      new Vector3(15, -5, -25)
+    );
     this.boatWakeParticle.blendMode = ParticleSystem.BLENDMODE_ONEONE;
     this.boatWakeParticle.gravity = new Vector3(0, -9.81, 0);
     this.boatWakeParticle.minEmitPower = 0.5;
@@ -251,15 +263,9 @@ class Player {
     this.boatWakeParticle.updateSpeed = 0.03;
     this.boatWakeParticle.direction1 = new Vector3(-6, 0, -5); // Direction de départ
     this.boatWakeParticle.direction2 = new Vector3(6, 0, -10); // Direction de fin
-  
+
     this.boatWakeParticle.start();
   }
-
-
-  
 }
-
-
-
 
 export default Player;
