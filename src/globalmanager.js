@@ -6,7 +6,7 @@ class GlobalManager {
   scene;
   camera;
   lights = [];
-  currentLevel = 1;
+  circuitChoice = 0;
   weatherChoice = 1;
   gameState ;
 
@@ -26,6 +26,7 @@ class GlobalManager {
     STATE_READY: 55,
     STATE_RUNNING: 60,
     STATE_END: 70,
+    STATE_RESTART: 80,
   });
 
   constructor() {

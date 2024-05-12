@@ -22,7 +22,7 @@ class customLoadingScreen {
     }
  
     displayLoadingUI() {
-
+        this.loader.style.display = 'flex';
     }
 
     hideLoadingUI() {

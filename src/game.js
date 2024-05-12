@@ -505,17 +505,11 @@ class Game {
     GlobalManager.engine.displayLoadingUI();
 
     await this.createScene();
-    this.player = new Player(new Vector3(
-     this.mapsize / 2,
-      4,
-     this.mapsize / 2
-    ));
-    await this.player.init();
-    GlobalManager.camera.lockedTarget = this.player.mesh;
+    
     this.initKeyboard();
 
     // MANQUE LA GESTION DES STATES
-    await this.loadLevel(levels[GlobalManager.currentLevel]);
+    await this.loadLevel(levels[GlobalManager.circuitChoice]);
     await this.drawLevel(this.player);
 
     const weather = new Weather(this.player);
@@ -535,7 +529,6 @@ class Game {
         weather.setWeather(2);
       }
       if (event.key === " ") {
-        console.log("La touche espace a été pressée.");
         this.startCountDown(); // Démarre le compte à rebours
       }
     });
@@ -561,6 +554,12 @@ class Game {
       }
       if(GlobalManager.gameState == GlobalManager.States.STATE_END) {
         this.stopTimer();
+        document.getElementById("chrono").innerText = this.startTimer.toFixed(2);
+        document.getElementById("playerinfo").style.display = 'flex';
+        GlobalManager.changeGameState(GlobalManager.States.STATE_RESTART);
+      }
+      if(GlobalManager.gameState == GlobalManager.States.STATE_RESTART) {
+        this.endGame();
       }
       time.innerHTML = this.startTimer.toFixed(2) + " secondes";
       GlobalManager.update();
@@ -586,18 +585,29 @@ class Game {
       0
     );
 
+    //Player
+    this.player = new Player(new Vector3(
+      this.mapsize / 2,
+       4,
+      this.mapsize / 2
+     ));
+     await this.player.init();
+
     //Camera
-    GlobalManager.camera = new FollowCamera(
-      "followCam1",
-      new Vector3(0, 0, 0),
-      GlobalManager.scene
-    );
+    // GlobalManager.camera = new FollowCamera(
+    //   "followCam1",
+    //   GlobalManager.scene
+    // );
+    GlobalManager.camera = new FollowCamera("FollwoCam", new Vector3(
+      this.mapsize / 2,
+       300,
+      this.mapsize / 2
+     ), GlobalManager.scene, this.player.mesh)
     GlobalManager.camera.radius = 12; // Distance de la cible
     GlobalManager.camera.heightOffset = 4; // Hauteur par rapport à la cible
     GlobalManager.camera.rotationOffset = 180; // Rotation de 90 degrés autour de la cible
     GlobalManager.camera.attachControl(this.canvas, true);
     GlobalManager.camera.inputs.clear(); // Supprimer les inputs par défaut
-    GlobalManager.camera.position = new Vector3(0, 0, 0);
     
 
 
@@ -607,6 +617,10 @@ class Game {
       new Vector3(0, 1, 0),
       GlobalManager.scene
     ));
+
+    setTimeout(() => {
+      document.getElementById("messageContainer").style.display = 'block';
+    },2000);
   }
 
   go() {
@@ -668,26 +682,35 @@ resetGame() {
 }
 
 startCountDown() {
-  let display = document.getElementById('countDown');
-  console.log(display);
-  document.getElementById("countDownContainer").style.display = 'block'; // Afficher la div
-  let timer = 3, seconds;
-  let countdownInterval = setInterval(function () {
-    seconds = parseInt(timer % 60, 10);
-    display.textContent = seconds; // Met à jour le texte dans la div
+  if (GlobalManager.gameState == GlobalManager.States.STATE_READY) {
+    document.getElementById("messageContainer").style.display = 'none';
+    let display = document.getElementById('countDown');
+    document.getElementById("countDownContainer").style.display = 'block'; // Affiche la div
+    let timer = 3;
 
-    if (--timer < 0) {
-      clearInterval(countdownInterval); // Arrête l'intervalle une fois le compte à rebours terminé
-      display.textContent = "0"; // Optionnel: afficher "Go!" à la fin
-     
-    }
-  }, 1000);
-  setTimeout(() => {
-    this.go();
-    document.getElementById("countDownContainer").style.display = 'none'; 
-  }, 4000); // 3 secondes
-  
+    // Mise à jour immédiate du compteur avant de démarrer l'intervalle
+    const updateCountDown = () => {
+      display.textContent = timer; // Met à jour le texte dans la div avec la valeur actuelle de timer
+      if (timer-- <= 0) {
+        clearInterval(countdownInterval); // Arrête l'intervalle une fois le compte à rebours terminé
+        display.textContent = "Go!";
+        setTimeout(() => {
+          display.textContent = ""; // Efface le texte après 1 seconde
+          this.go();
+          document.getElementById("countDownContainer").style.display = 'none'; // Masque la div
+        }, 1000);
+      }
+    };
+
+    // Appel immédiat
+    updateCountDown();
+    
+    // Création d'un intervalle qui se déclenche chaque seconde
+    let countdownInterval = setInterval(updateCountDown, 1000);
+  }
 }
+
+
 
 }
 

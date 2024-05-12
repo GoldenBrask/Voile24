@@ -16,6 +16,13 @@ window.onload = () => {
   const playButton = document.getElementById("playButton");
   const controlsButton = document.getElementById("controlsButton");
   const creditsButton = document.getElementById("creditsButton");
+  let timer = document.getElementById("timeContainer");
+  let sunnyChoice = document.getElementById("sunny");
+  let rainyChoice = document.getElementById("rainy");
+  let circuit1 = document.getElementById("circuit1");
+  let circuit2 = document.getElementById("circuit2");
+  let restartButton = document.getElementById("restartButton");
+  let playerInfo = document.getElementById("playerinfo");
 
   const choicesUser = document.getElementById("choicesUser");
   
@@ -36,11 +43,36 @@ window.onload = () => {
 
 
 
-  document.getElementById("sunny").addEventListener("click", () => {
+  sunnyChoice.addEventListener("click", () => {
+    sunnyChoice.classList.add("active");
+    rainyChoice.classList.remove("active");
     GlobalManager.weatherChoice = 1;
   });
-  document.getElementById("rainy").addEventListener("click", () => {
+  rainyChoice.addEventListener("click", () => {
     GlobalManager.weatherChoice = 2;
+    rainyChoice.classList.add("active");
+    sunnyChoice.classList.remove("active");
+  });
+
+  circuit1.addEventListener("click", () => {
+    GlobalManager.circuitChoice = 0;
+    circuit1.classList.add("active");
+    circuit2.classList.remove("active");
+  });
+  circuit2.addEventListener("click", () => {
+    GlobalManager.circuitChoice = 1;
+    circuit2.classList.add("active"); 
+    circuit1.classList.remove("active");
+  });
+
+  restartButton.addEventListener("click", () => {
+    menu.style.display = "none";
+    document.getElementById("gui").style.display = "block";
+    choicesUser.style.display = "flex";
+    playerInfo.style.display = "none";
+    console.log(playerInfo);
+    console.log(choicesUser);
+    console.log("restart");
   });
 
 
@@ -49,16 +81,12 @@ window.onload = () => {
     document.getElementById("gui").style.display = "none";
     GlobalManager.changeGameState(GlobalManager.States.STATE_RUNNING);
       babylonInit().then(() => {
+        timer.style.display = "block";
         const game = new Game(canvas, engine);
         game.start();
       });
 
   });
-
-
-
-
-
 
 };
 
