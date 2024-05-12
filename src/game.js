@@ -36,11 +36,15 @@ import finishUrl from "../assets/models/finish_line.glb";
 import mountain1MeshUrl from "../assets/models/mountain1.glb";
 import mountain2MeshUrl from "../assets/models/mountain2.glb";
 import arrowMeshUrl from "../assets/models/direction_arrows.glb";
+import frogMeshUrl from "../assets/models/frog.glb";
+import flowersMeshUrl from "../assets/models/pond_pack.glb";
+import olympicMeshUrl from "../assets/models/olympic_rings.glb";
+import landscapeMeshUrl from "../assets/models/landscape.glb";
+import vogueMeshUrl from "../assets/models/vogueMery.glb";
 
 import chekered from "../assets/textures/checkered.png";
 import Player from "./player";
 import Mountain from "./moutain";
-import Decors from "./decors";
 import Buoy from "./buoy";
 import { GlobalManager } from "./globalmanager";
 import { CannonJSPlugin } from "babylonjs";
@@ -55,16 +59,16 @@ const LEVELS = {
     "                BBBBB                   ",
     "                B   B                   ",
     "                B S B                   ",
-    "                B   B BBBBBBBBBBBBB     ",
-    "                B   B B  Q   Q    B     ",
-    "                B   BBB     BBB   B     ",
-    "                B          B M B  B     ",
-    "                BD D       B   B  B     ",
+    "                B C B BBBBBBBBBBBBB     ",
+    "                B P B B  Q   Q    B     ",
+    "                B L BBB     BBB   B     ",
+    " m              B          B   B  B     ",
+    "                BD D       B M B  B     ",
     "                BBBBBBBBBBBB   B  B     ",
     "                               B  B     ",
     "                               B  B     ",
-    "                               B  B     ",
-    "                               B  B     ",
+    "       T                       B  B     ",
+    "                      O        B  B     ",
     "                               B  B     ",
     "                BBBBBBBBBBBBBBBB  B     ",
     "                B                 B     ",
@@ -73,7 +77,7 @@ const LEVELS = {
     "        B    BBBBBBBBBBBBBBBBBBBBBB     ",
     "        B    B                          ",
     "        B    BBBBB                      ",
-    "        BBB      BB                     ",
+    "        BBB      BB            V        ",
     "         BBBBBBB   BB                   ",
     "               BB   BB                  ",
     "                B     B                 ",
@@ -82,8 +86,8 @@ const LEVELS = {
     "                    BB  BB              ",
     "                     B   B              ",
     "                     BB   B             ",
-    "                     BB   B             ",
-    "                     B  F  B            ",
+    "      m              BB   B             ",
+    "                     BbbFbbB            ",
     "                  BBBEEEEEEB            ",
     "                  BBBBBBBBBB            ",
     "                                        ",
@@ -159,7 +163,7 @@ class Game {
       for (let x = 0; x < this.width; x++) {
         let currentCell = currentRow[x];
 
-        let wall;
+        let object;
         let buoy;
         let mountain;
         let finishline;
@@ -168,7 +172,7 @@ class Game {
         let material;
         let animation;
         let miniMountain;
-        // let wallDepth;
+        // let  objectDepth;
         // Vérification
 
         switch (currentCell) {
@@ -211,7 +215,7 @@ class Game {
               }
             });
 
-            wall = MeshBuilder.CreateBox(
+            object = MeshBuilder.CreateBox(
               "ENDWALL",
               {
                 height: 50,
@@ -220,32 +224,32 @@ class Game {
               },
               GlobalManager.scene
             );
-            wall.checkCollisions = true;
-            wall.position = new Vector3(
+            object.checkCollisions = true;
+            object.position = new Vector3(
               x * scaleFactor - this.mapsize / 2,
               0,
               y * scaleFactor - this.mapsize / 2
             );
-            wall.scaling = new Vector3(0.9, 0.5, 0.05);
-            wall.isVisible = false;
+            object.scaling = new Vector3(0.9, 0.5, 0.05);
+            object.isVisible = false;
             break;
           case "M":
             //TODO Ajouter un murc
 
-            wall = SceneLoader.ImportMeshAsync(
+            object = SceneLoader.ImportMeshAsync(
               "",
               "",
               mountain1MeshUrl,
               GlobalManager.scene
             );
-            wall.then((result) => {
+            object.then((result) => {
               let mesh = result.meshes[0];
               mesh.position = new Vector3(
                 x * scaleFactor - this.mapsize / 2,
-                -50,
+                2,
                 y * scaleFactor - this.mapsize / 2
               );
-              mesh.scaling = new Vector3(0.15, 0.15, 0.15);
+              mesh.scaling = new Vector3(0.12, 0.12, 0.12);
               mesh.rotationQuaternion = Quaternion.Identity();
               mesh.name = "Mountain";
 
@@ -262,32 +266,132 @@ class Game {
 
             break;
           case "m":
-            //TODO Ajouter un murc
-            miniMountain = new Decors(
-              new Vector3(
-                x * scaleFactor - this.mapsize / 2,
-                0,
-                y * scaleFactor - this.mapsize / 2
-              ),
+            object = SceneLoader.ImportMeshAsync(
+              "",
+              "",
               mountain2MeshUrl,
-              new Vector3(0.15, 0.15, 0.15)
+              GlobalManager.scene
             );
-            miniMountain.init();
+            object.then((result) => {
+              let mesh = result.meshes[0];
+              mesh.position = new Vector3(
+                x * scaleFactor - this.mapsize / 2,
+                2,
+                y * scaleFactor - this.mapsize / 2
+              );
+              mesh.scaling = new Vector3(50, 50, 50);
+              mesh.rotationQuaternion = Quaternion.Identity();
+              mesh.name = "mountain";
+
+              for (let childMesh of result.meshes) {
+                if (childMesh.getTotalVertices() > 0) {
+                  childMesh.receiveShadows = true;
+                  GlobalManager.addShadowCaster(childMesh);
+                }
+              }
+            });
+
+            break;
+          case "L":
+            object = SceneLoader.ImportMeshAsync(
+              "",
+              "",
+              landscapeMeshUrl,
+              GlobalManager.scene
+            );
+            object.then((result) => {
+              let mesh = result.meshes[0];
+              mesh.position = new Vector3(
+                x * scaleFactor - this.mapsize / 2,
+                2,
+                y * scaleFactor - this.mapsize / 2
+              );
+              mesh.scaling = new Vector3(10, 10, 10);
+              mesh.rotationQuaternion = Quaternion.Identity();
+              mesh.name = "Landscape";
+
+              mesh.rotate(Vector3.Up(), Math.PI/2);
+
+              for (let childMesh of result.meshes) {
+                if (childMesh.getTotalVertices() > 0) {
+                  childMesh.receiveShadows = true;
+                  GlobalManager.addShadowCaster(childMesh);
+                }
+              }
+            });
+
+            break;
+          case "O":
+            object = SceneLoader.ImportMeshAsync(
+              "",
+              "",
+              olympicMeshUrl,
+              GlobalManager.scene
+            );
+            object.then((result) => {
+              let mesh = result.meshes[0];
+              mesh.position = new Vector3(
+                x * scaleFactor - this.mapsize / 2,
+                2,
+                y * scaleFactor - this.mapsize / 2
+              );
+              mesh.scaling = new Vector3(5, 5, 5);
+              mesh.rotationQuaternion = Quaternion.Identity();
+              mesh.name = "Olympic";
+
+              // mesh.checkCollisions = true;
+
+              for (let childMesh of result.meshes) {
+                // childMesh.checkCollisions = true;
+                if (childMesh.getTotalVertices() > 0) {
+                  childMesh.receiveShadows = true;
+                  GlobalManager.addShadowCaster(childMesh);
+                }
+              }
+            });
+
+            break;
+          case "V":
+            object = SceneLoader.ImportMeshAsync(
+              "",
+              "",
+              vogueMeshUrl,
+              GlobalManager.scene
+            );
+            object.then((result) => {
+              let mesh = result.meshes[0];
+              mesh.position = new Vector3(
+                x * scaleFactor - this.mapsize / 2,
+                2,
+                y * scaleFactor - this.mapsize / 2
+              );
+              mesh.scaling = new Vector3(50, 50, 50);
+              mesh.rotationQuaternion = Quaternion.Identity();
+              mesh.name = "VogueMery";
+              mesh.rotate(Vector3.Up(), Math.PI);
+
+              for (let childMesh of result.meshes) {
+                if (childMesh.getTotalVertices() > 0) {
+                  childMesh.receiveShadows = true;
+                  GlobalManager.addShadowCaster(childMesh);
+                }
+              }
+            });
+
             break;
           case "D":
-            //TODO Ajouter un murc
 
-            wall = SceneLoader.ImportMeshAsync(
+            object = SceneLoader.ImportMeshAsync(
               "",
               "",
               arrowMeshUrl,
               GlobalManager.scene
             );
-            wall.then((result) => {
+            object.then((result) => {
               let mesh = result.meshes[0];
               mesh.position = new Vector3(
                 x * scaleFactor - this.mapsize / 2,
-                0,
+                2,
                 y * scaleFactor - this.mapsize / 2
               );
               mesh.scaling = new Vector3(1, 1, 1);
@@ -313,22 +417,22 @@ class Game {
           case "Z":
             //TODO Ajouter un murc
 
-            wall = SceneLoader.ImportMeshAsync(
+            object = SceneLoader.ImportMeshAsync(
               "",
               "",
               arrowMeshUrl,
               GlobalManager.scene
             );
-            wall.then((result) => {
+            object.then((result) => {
               let mesh = result.meshes[0];
               mesh.position = new Vector3(
                 x * scaleFactor - this.mapsize / 2,
-                0,
+                2,
                 y * scaleFactor - this.mapsize / 2
               );
               mesh.scaling = new Vector3(1, 1, 1);
               mesh.rotationQuaternion = Quaternion.Identity();
-              
+
               mesh.name = "Arrow";
 
               for (let childMesh of result.meshes) {
@@ -348,17 +452,17 @@ class Game {
           case "Q":
             //TODO Ajouter un murc
 
-            wall = SceneLoader.ImportMeshAsync(
+            object = SceneLoader.ImportMeshAsync(
               "",
               "",
               arrowMeshUrl,
               GlobalManager.scene
             );
-            wall.then((result) => {
+            object.then((result) => {
               let mesh = result.meshes[0];
               mesh.position = new Vector3(
                 x * scaleFactor - this.mapsize / 2,
-                0,
+                2,
                 y * scaleFactor - this.mapsize / 2 + 8
               );
               mesh.scaling = new Vector3(1, 1, 1);
@@ -366,10 +470,7 @@ class Game {
               mesh.rotate(Vector3.Up(), Math.PI);
               mesh.name = "Arrow";
 
-              mesh.checkCollisions = true;
-
               for (let childMesh of result.meshes) {
-                childMesh.checkCollisions = true;
                 if (childMesh.getTotalVertices() > 0) {
                   childMesh.receiveShadows = true;
                   GlobalManager.addShadowCaster(childMesh);
@@ -383,44 +484,7 @@ class Game {
             });
 
             break;
-          case "W":
-            //TODO Ajouter un mur
-            // wallWidth = 50;
-            // wallHeight = 50;
-            // wallDepth = 50;
-            wall = MeshBuilder.CreateBox(
-              "wall",
-              {
-                height: 30,
-                width: 30,
-                depth: 30,
-              },
-              GlobalManager.scene
-            );
-            // wall.checkCollisions = true;
-            wall.position = new Vector3(
-              x * scaleFactor - this.mapsize / 2,
-              15,
-              y * scaleFactor - this.mapsize / 2
-            );
-            wall.scaling = new Vector3(1, 1, 1);
-            wall.material = new StandardMaterial(
-              "wallMaterial",
-              GlobalManager.scene
-            );
-            wall.material.diffuseColor = new Color3(1, 0, 0);
-
-            wall.physicsImpostor = new PhysicsImpostor(
-              wall,
-              PhysicsImpostor.BoxImpostor,
-              { mass: 0, restitution: 0 }
-            );
-
-            break;
-          case "B":
-            // buoy = new Buoy(new Vector3(x* scaleFactor - this.mapsize / 2 , 15, y * scaleFactor - this.mapsize / 2 ));
-            // await buoy.initBuoy();
-            // this.buoys.push(buoy);
+          case "b":
             mountain = new Mountain(
               new Vector3(
                 x * scaleFactor - this.mapsize / 2,
@@ -428,8 +492,10 @@ class Game {
                 y * scaleFactor - this.mapsize / 2
               )
             );
-            mountain.init();
-            wall = MeshBuilder.CreateBox(
+            await mountain.init();
+            break;
+          case "B":
+            object = MeshBuilder.CreateBox(
               "barrier",
               {
                 height: 2,
@@ -438,22 +504,20 @@ class Game {
               },
               GlobalManager.scene
             );
-            wall.checkCollisions = true;
-            wall.position = new Vector3(
+            object.checkCollisions = true;
+            object.position = new Vector3(
               x * scaleFactor - this.mapsize / 2,
               4.5,
               y * scaleFactor - this.mapsize / 2
             );
-            // wall.scaling = new Vector3(0.8335, 1, 0.0005);
+            //  object.scaling = new Vector3(0.8335, 1, 0.0005);
 
-            wall.material = new StandardMaterial(
+            object.material = new StandardMaterial(
               "wallMaterial",
               GlobalManager.scene
             );
-            wall.material.diffuseColor = new Color3(1, 0, 0);
-            wall.visibility = 0.5;
-
-            // Assurez-vous que Babylon est correctement importé et initialisé ici
+            object.material.diffuseColor = new Color3(1, 0, 0);
+            object.visibility = 0.5;
 
             // Création de la texture
             texture = new Texture(chekered, GlobalManager.scene);
@@ -466,7 +530,7 @@ class Game {
             material.diffuseTexture = texture; // Appliquer la texture comme texture diffuse
 
             // Appliquer le matériau à la paroi
-            wall.material = material;
+            object.material = material;
 
             hasNeighbor = false;
             if (x > 0 && currentRow[x - 1] === "B") {
@@ -480,60 +544,8 @@ class Game {
 
             // Appliquer la rotation seulement s'il y a un voisin à gauche ou à droite
             if (!hasNeighbor) {
-              wall.rotate(Vector3.Up(), Math.PI / 2); // Rotation de 90 degrés
+              object.rotate(Vector3.Up(), Math.PI / 2); // Rotation de 90 degrés
             }
-            break;
-          case "b":
-            // buoy = new Buoy(new Vector3(x* scaleFactor - this.mapsize / 2 , 15, y * scaleFactor - this.mapsize / 2 ));
-            // await buoy.initBuoy();
-            // this.buoys.push(buoy);
-            mountain = new Mountain(
-              new Vector3(
-                x * scaleFactor - this.mapsize / 2,
-                0,
-                y * scaleFactor - this.mapsize / 2
-              )
-            );
-            mountain.init();
-            wall = MeshBuilder.CreateBox(
-              "barriertounr",
-              {
-                height: 2,
-                width: 30,
-                depth: 3,
-              },
-              GlobalManager.scene
-            );
-            wall.checkCollisions = true;
-            wall.position = new Vector3(
-              x * scaleFactor - this.mapsize / 2,
-              2.5,
-              y * scaleFactor - this.mapsize / 2
-            );
-            wall.scaling = new Vector3(0.8335, 1, 0.0005);
-
-            wall.material = new StandardMaterial(
-              "wallMaterial",
-              GlobalManager.scene
-            );
-            wall.material.diffuseColor = new Color3(1, 0, 0);
-            wall.visibility = 0.5;
-
-            // Assurez-vous que Babylon est correctement importé et initialisé ici
-
-            // Création de la texture
-            texture = new Texture(chekered, GlobalManager.scene);
-
-            // Création du matériau
-            material = new StandardMaterial(
-              "materialForWall",
-              GlobalManager.scene
-            );
-            material.diffuseTexture = texture; // Appliquer la texture comme texture diffuse
-
-            // Appliquer le matériau à la paroi
-            wall.material = material;
-            wall.rotate(Vector3.Up(), Math.PI / 4); // Rotation de 90 degrés
             break;
           default:
             break;
@@ -556,17 +568,11 @@ class Game {
     this.initKeyboard();
     // MANQUE LA GESTION DES STATES
     await this.loadLevel(LEVELS);
-    this.drawLevel();
+    await this.drawLevel();
 
     const weather = new Weather(this.player);
-    weather.setWeather(2);
-    let player2 = new Player(new Vector3(5, 3, 0));
-    await player2.init();
-
-    let player3 = new Player(new Vector3(10, 3, 0));
-    await player3.init();
-
-
+    await weather.setWeather(1);
+   
     GlobalManager.engine.hideLoadingUI();
 
     //TODO : le bloc suivant à supprimer
@@ -603,27 +609,25 @@ class Game {
   }
 
   updateGame() {
-    for (let buoy of this.buoys) {
-      buoy.update();
+    if (typeof this.player !== 'undefined' && typeof this.player.mesh !== 'undefined') {
+      this.player.update(this.inputMap, this.actions);
     }
-    this.player.update(this.inputMap, this.actions);
   }
 
   async createScene() {
     GlobalManager.scene = new Scene(GlobalManager.engine);
 
-    // GlobalManager.scene.collisionsEnabled = true;
-    // const assumedFramesPerSecond = 60;
-    // GlobalManager.scene.gravity = new Vector3(
-    //   0,
-    //   GlobalManager.gravityVector / assumedFramesPerSecond,
-    //   0
-    // );
-    GlobalManager.scene.enablePhysics(
-      new Vector3(0, -9.81, 0),
-      new CannonJSPlugin(true, 10, CANNON)
+    GlobalManager.scene.collisionsEnabled = true;
+    const assumedFramesPerSecond = 60;
+    GlobalManager.scene.gravity = new Vector3(
+      0,
+      GlobalManager.gravityVector / assumedFramesPerSecond,
+      0
     );
-
+    // GlobalManager.scene.enablePhysics(
+    //   new Vector3(0, -9.81, 0),
+    //   new CannonJSPlugin(true, 10, CANNON)
+    // );
 
     //Camera
     GlobalManager.camera = new FollowCamera(
@@ -642,9 +646,6 @@ class Game {
       new Vector3(0, 1, 0),
       GlobalManager.scene
     );
-
-
-
   }
 }
 
