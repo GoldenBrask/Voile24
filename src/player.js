@@ -123,17 +123,17 @@ class Player {
     this.boatWakeParticle.minSize = 0;
     this.boatWakeParticle.maxSize = 0;
 
-    if (inputMap["KeyA"]) {
+    if (inputMap["KeyA"] || inputMap["ArrowLeft"]) {
       this.moveInput.x = -1;
       this.boatWakeParticle.minSize = 0;
       this.boatWakeParticle.maxSize = 0.3;
-    } else if (inputMap["KeyD"]) {
+    } else if (inputMap["KeyD"] || inputMap["ArrowRight"]) {
       this.moveInput.x = 1;
       this.boatWakeParticle.minSize = 0;
       this.boatWakeParticle.maxSize = 0.3;
     }
 
-    if (inputMap["KeyW"]) {
+    if (inputMap["KeyW"] || inputMap["ArrowUp"]) {
       this.moveInput.z = 1;
       this.boatWakeParticle.minSize = 0;
       this.boatWakeParticle.maxSize = 0.3;

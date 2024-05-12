@@ -21,6 +21,9 @@ import {
 
 
 import { Inspector } from "@babylonjs/inspector";
+import CustomLoadingScreen   from "./customLoadingScreen.js";
+
+
 import finishUrl from "../assets/models/finish_line.glb";
 import mountain1MeshUrl from "../assets/models/mountain1.glb";
 import mountain2MeshUrl from "../assets/models/mountain2.glb";
@@ -550,6 +553,7 @@ class Game {
   }
 
   async initGame() {
+    GlobalManager.engine.loadingScreen = new CustomLoadingScreen();
     GlobalManager.engine.displayLoadingUI();
     await this.createScene();
     this.initKeyboard();
@@ -613,8 +617,8 @@ class Game {
       new Vector3(0, 0, 0),
       GlobalManager.scene
     );
-    GlobalManager.camera.radius = 12; // Distance de la cible
-    GlobalManager.camera.heightOffset = 5; // Hauteur par rapport à la cible
+    GlobalManager.camera.radius = 11; // Distance de la cible
+    GlobalManager.camera.heightOffset = 3; // Hauteur par rapport à la cible
     GlobalManager.camera.rotationOffset = 180; // Rotation de 90 degrés autour de la cible
     GlobalManager.camera.attachControl(this.canvas, true);
     GlobalManager.camera.inputs.clear(); // Supprimer les inputs par défaut
