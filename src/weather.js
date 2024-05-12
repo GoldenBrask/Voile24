@@ -140,7 +140,7 @@ class Weather {
     water.backFaceCulling = true;
     water.bumpTexture = new Texture(waterUrl, GlobalManager.scene);
     water.windForce = -6;
-    water.waveHeight = 0.2;
+    water.waveHeight = 0.1;
     water.windDirection = new Vector2(1, 1);
     water.waterColor = new Color3(0.11, 0.21, 0.28);
     water.colorBlendFactor = 0.7;
