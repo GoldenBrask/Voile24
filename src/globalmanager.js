@@ -7,7 +7,7 @@ class GlobalManager {
   camera;
   lights = [];
   currentLevel = 1;
-  currentWeather = 1;
+  weatherChoice = 1;
   gameState ;
 
   shadowGenerators = [];

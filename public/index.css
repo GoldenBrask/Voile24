@@ -146,19 +146,21 @@ body {
   height: 20px;
 }
 
-#time {
-  display: none;
+#timeContainer {
   position: absolute;
-  background-color: rgb(201, 184, 184);
-  border: 2px solid rgb(124, 59, 59);
+  background-color: rgb(82, 151, 230);
+  border: 2px solid rgb(0, 0, 0);
+  border-radius: 4px;
+  padding: 1px;
   text-align: center;
   font-size: 16px;
-  color: rgb(10, 10, 10);
+  color: rgb(255, 250, 250);
   top: 15px;
   left: 10px;
-  width: 60px;
-  height: 20px;
+  width: 100px;
+  height: 40px;
 }
+
 #loader {
   display: none;
   justify-content: center;
