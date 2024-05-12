@@ -6,14 +6,29 @@ class GlobalManager {
   scene;
   camera;
   lights = [];
+  currentLevel = 0;
+  currentWeather = 1;
+  gameState ;
 
   shadowGenerators = [];
 
   deltaTime;
 
   gravityVector = new Vector3(0, 0, 0);
+  States = Object.freeze({
+    STATE_NONE: 0,
+    STATE_INIT: 10,
+    STATE_LOADING: 20,
+    STATE_MENU: 25,
+    STATE_LAUNCH: 40,
+    STATE_NEW_LEVEL: 45,
+    STATE_READY: 55,
+    STATE_RUNNING: 60,
+    STATE_END: 70,
+  });
 
-  constructor() {}
+  constructor() {
+  }
 
   static get instance() {
     return globalThis[Symbol.for(`PF_${GlobalManager.name}`)] || new this();
@@ -40,6 +55,15 @@ class GlobalManager {
     for (let shad of this.shadowGenerators) {
       shad.addShadowCaster(object, bChilds);
     }
+  }
+  changeGameState(newState) {
+    this.gameState = newState;
+  }
+  setLevel(level) {
+    this.currentLevel = level;
+  }
+  setWeather(weather) {
+    this.currentWeather = weather;
   }
 }
 
